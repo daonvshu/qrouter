@@ -11,17 +11,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\abstractrouterwidget.cpp" />
+    <ClCompile Include="src\qrouter.cpp" />
     <ClCompile Include="test\main.cpp" />
-    <ClCompile Include="test\qrouter.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="test\qrouter.h" />
+    <ClCompile Include="test\qroutertest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="test\qrouter.qrc" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="test\qrouter.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\abstractrouterwidget.h" />
+    <ClInclude Include="src\implclass.h" />
+    <ClInclude Include="src\qrouter.h" />
+    <QtMoc Include="test\qroutertest.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B12994E5-2FE9-4555-BCB9-81B330271D69}</ProjectGuid>

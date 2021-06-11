@@ -27,13 +27,25 @@
     <Filter Include="Header Files\test">
       <UniqueIdentifier>{1b8d66b0-a5e3-4619-9be5-e126ace97039}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\src">
+      <UniqueIdentifier>{991b1747-2656-41d4-bbbc-9525a0c07bdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\src">
+      <UniqueIdentifier>{3c1b15ea-0c97-490d-9e17-7f366ba65c0f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\main.cpp">
       <Filter>Source Files\test</Filter>
     </ClCompile>
-    <ClCompile Include="test\qrouter.cpp">
+    <ClCompile Include="test\qroutertest.cpp">
       <Filter>Source Files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\abstractrouterwidget.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\qrouter.cpp">
+      <Filter>Source Files\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -47,7 +59,18 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="test\qrouter.h">
+    <ClInclude Include="src\implclass.h">
+      <Filter>Header Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\abstractrouterwidget.h">
+      <Filter>Header Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\qrouter.h">
+      <Filter>Header Files\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="test\qroutertest.h">
       <Filter>Header Files\test</Filter>
     </QtMoc>
   </ItemGroup>

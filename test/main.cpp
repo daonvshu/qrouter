@@ -1,10 +1,10 @@
-#include "qrouter.h"
+#include "qroutertest.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QRouter w;
+    QRouterTest w;
     w.show();
     return a.exec();
 }
