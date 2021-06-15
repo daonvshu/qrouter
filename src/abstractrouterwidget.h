@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#include "implclass.h"
+#include <qwidget.h>
+#include <qvariant.h>
 
-class AbstractRouterWidget : public ImplClass {
+class AbstractRouterWidget : public QWidget {
 public:
-    explicit AbstractRouterWidget(const QVariant& data, ImplPrivate& pd, QWidget* parent);
-
     explicit AbstractRouterWidget(const QVariant& data, QWidget* parent);
 
     virtual void onNavigateResult(const QVariant& data);

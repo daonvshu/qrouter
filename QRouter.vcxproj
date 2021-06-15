@@ -24,7 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\abstractrouterwidget.h" />
-    <ClInclude Include="src\implclass.h" />
     <ClInclude Include="src\qrouter.h" />
     <QtMoc Include="test\qroutertest.h" />
   </ItemGroup>

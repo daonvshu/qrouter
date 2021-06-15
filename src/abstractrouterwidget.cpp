@@ -1,13 +1,9 @@
 #include "abstractrouterwidget.h"
 
-AbstractRouterWidget::AbstractRouterWidget(const QVariant& data, ImplPrivate& pd, QWidget* parent)
-    : ImplClass(pd, parent)
+AbstractRouterWidget::AbstractRouterWidget(const QVariant& data, QWidget* parent)
+    : QWidget(parent)
     , navigateData(data)
     , firstShow(true)
-{}
-
-AbstractRouterWidget::AbstractRouterWidget(const QVariant& data, QWidget* parent)
-    : AbstractRouterWidget(data, *new ImplPrivate, parent)
 {}
 
 void AbstractRouterWidget::onNavigateResult(const QVariant&) {

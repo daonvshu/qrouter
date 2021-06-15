@@ -59,9 +59,6 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\implclass.h">
-      <Filter>Header Files\src</Filter>
-    </ClInclude>
     <ClInclude Include="src\abstractrouterwidget.h">
       <Filter>Header Files\src</Filter>
     </ClInclude>
