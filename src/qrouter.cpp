@@ -29,9 +29,8 @@ QStringList QRouter::readStack() {
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
-    Q_ASSERT_X(containers.contains(m_curContextId), "qrouter push", "cannot find context id!");
+    auto& item = currentContainter();
 
-    auto& item = containers[m_curContextId];
     auto widget = reflectByName(pageClassName, item.container, data);
     item.stack.append(widget);
 
@@ -40,9 +39,8 @@ void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
 }
 
 void QRouter::pushReplace(const QByteArray& pageClassName, const QVariant& data) {
-    Q_ASSERT_X(containers.contains(m_curContextId), "qrouter push and replace", "cannot find context id!");
+    auto& item = currentContainter();
 
-    auto& item = containers[m_curContextId];
     if (!item.stack.isEmpty()) {
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
@@ -52,10 +50,21 @@ void QRouter::pushReplace(const QByteArray& pageClassName, const QVariant& data)
     push(pageClassName, data);
 }
 
-void QRouter::pop(const QVariant& data) {
-    Q_ASSERT_X(containers.contains(m_curContextId), "qrouter pop", "cannot find context id!");
+void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data) {
+    auto& item = currentContainter();
 
-    auto& item = containers[m_curContextId];
+    while (!item.stack.isEmpty()) {
+        auto widget = item.stack.takeLast();
+        item.container->removeWidget(widget);
+        widget->deleteLater();
+    }
+
+    push(pageClassName, data);
+}
+
+void QRouter::pop(const QVariant& data) {
+    auto& item = currentContainter();
+
     if (!item.stack.isEmpty()) {
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
@@ -67,9 +76,8 @@ void QRouter::pop(const QVariant& data) {
 }
 
 void QRouter::popUntil(const QByteArray& untilName) {
-    Q_ASSERT_X(containers.contains(m_curContextId), "qrouter pop until", "cannot find context id!");
+    auto& item = currentContainter();
 
-    auto& item = containers[m_curContextId];
     while (!item.stack.isEmpty() && item.stack.last()->metaObject()->className() != untilName) {
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
@@ -91,3 +99,10 @@ AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidge
 
     return widget;
 }
+
+QRouter::RouterContainerItem& QRouter::currentContainter() {
+    Q_ASSERT_X(containers.contains(m_curContextId), "get current containter", "cannot find context id!");
+
+    return containers[m_curContextId];
+}
+

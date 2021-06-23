@@ -14,10 +14,11 @@ public:
 
     QStringList readStack();
 
-    void push(const QByteArray& pageClassName, const QVariant& data);
-    void pushReplace(const QByteArray& pageClassName, const QVariant& data);
+    void push(const QByteArray& pageClassName, const QVariant& data = QVariant());
+    void pushReplace(const QByteArray& pageClassName, const QVariant& data = QVariant());
     void popAndPush();
     void pushAndRemove();
+    void pushAndClear(const QByteArray& pageClassName, const QVariant& data = QVariant());
 
     void pop(const QVariant& data);
     void popUntil(const QByteArray& untilName);
@@ -38,4 +39,6 @@ private:
 
 private:
     AbstractRouterWidget* reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data);
+
+    RouterContainerItem& currentContainter();
 };
