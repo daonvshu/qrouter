@@ -23,6 +23,9 @@ public:
     void pop(const QVariant& data);
     void popUntil(const QByteArray& untilName);
 
+    QVariant sendEvent(const QString& event, const QVariant& data = QVariant());
+    void sendEventAll(const QString& event, const QVariant& data = QVariant());
+
 private:
     QRouter();
 

@@ -11,12 +11,18 @@ public:
 
     virtual bool attempClose();
 
+    QVariant onRouterEvent(const QString& event, const QVariant& data);
+
 private:
     QVariant navigateData;
     bool firstShow;
 
 protected:
     QVariant getNavigateData(bool clear = true);
+
+    virtual void runRouterEvent(const QString& event, const QVariant& data);
+
+    virtual QVariant executeRouterEvent(const QString& event, const QVariant& data);
 
     void showEvent(QShowEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;

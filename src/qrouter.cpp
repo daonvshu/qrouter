@@ -66,12 +66,14 @@ void QRouter::pop(const QVariant& data) {
     auto& item = currentContainter();
 
     if (!item.stack.isEmpty()) {
-        auto widget = item.stack.takeLast();
-        item.container->removeWidget(widget);
-        widget->deleteLater();
+        if (item.stack.last()->attempClose()) {
+            auto widget = item.stack.takeLast();
+            item.container->removeWidget(widget);
+            widget->deleteLater();
 
-        item.container->setCurrentWidget(item.stack.last());
-        item.stack.last()->onNavigateResult(data);
+            item.container->setCurrentWidget(item.stack.last());
+            item.stack.last()->onNavigateResult(data);
+        }
     }
 }
 
@@ -79,6 +81,10 @@ void QRouter::popUntil(const QByteArray& untilName) {
     auto& item = currentContainter();
 
     while (!item.stack.isEmpty() && item.stack.last()->metaObject()->className() != untilName) {
+        if (!item.stack.last()->attempClose()) {
+            item.container->setCurrentWidget(item.stack.last());
+            return;
+        }
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
         widget->deleteLater();
@@ -88,6 +94,24 @@ void QRouter::popUntil(const QByteArray& untilName) {
         item.container->setCurrentWidget(item.stack.last());
     }
 }
+
+QVariant QRouter::sendEvent(const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+    if (item.stack.isEmpty()) {
+        return QVariant();
+    }
+
+    return item.stack.last()->onRouterEvent(event, data);
+}
+
+void QRouter::sendEventAll(const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+
+    for (const auto& widget: item.stack) {
+        widget->onRouterEvent(event, data);
+    }
+}
+
 
 AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data) {
     int type = QMetaType::type(className + '*');

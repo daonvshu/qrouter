@@ -13,6 +13,11 @@ bool AbstractRouterWidget::attempClose() {
     return true;
 }
 
+QVariant AbstractRouterWidget::onRouterEvent(const QString& event, const QVariant& data) {
+    runRouterEvent(event, data);
+
+    return executeRouterEvent(event, data);
+}
 
 QVariant AbstractRouterWidget::getNavigateData(bool clear) {
     auto data = navigateData;
@@ -22,6 +27,12 @@ QVariant AbstractRouterWidget::getNavigateData(bool clear) {
     return data;
 }
 
+void AbstractRouterWidget::runRouterEvent(const QString&, const QVariant&) {
+}
+
+QVariant AbstractRouterWidget::executeRouterEvent(const QString&, const QVariant&) {
+    return QVariant();
+}
 
 void AbstractRouterWidget::showEvent(QShowEvent*) {
     if (firstShow) {
