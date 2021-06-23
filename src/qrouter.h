@@ -12,6 +12,8 @@ public:
 
     static QRouter& of(int contextId = 0);
 
+    QStringList readStack();
+
     void push(const QByteArray& pageClassName, const QVariant& data);
     void pushReplace(const QByteArray& pageClassName, const QVariant& data);
     void popAndPush();

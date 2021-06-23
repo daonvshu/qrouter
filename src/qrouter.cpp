@@ -10,10 +10,22 @@ QRouter& QRouter::install(QStackedWidget* stackContainer, int contextId) {
     RouterContainerItem item;
     item.container = stackContainer;
     router.containers.insert(contextId, item);
+    return router;
 }
 
 QRouter& QRouter::of(int contextId) {
     router.m_curContextId = contextId;
+    return router;
+}
+
+QStringList QRouter::readStack() {
+    QStringList stackNames;
+
+    auto& item = containers[m_curContextId];
+    for (const auto& i : item.stack) {
+        stackNames << i->metaObject()->className();
+    }
+    return stackNames;
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
