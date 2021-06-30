@@ -21,11 +21,27 @@ QRouter& QRouter::of(int contextId) {
 QStringList QRouter::readStack() {
     QStringList stackNames;
 
-    auto& item = containers[m_curContextId];
+    auto& item = currentContainter();
     for (const auto& i : item.stack) {
         stackNames << i->metaObject()->className();
     }
     return stackNames;
+}
+
+AbstractRouterWidget* QRouter::current() {
+    auto& item = currentContainter();
+    if (item.stack.isEmpty()) {
+        return nullptr;
+    }
+    return item.stack.first();
+}
+
+QString QRouter::currentName() {
+    auto item = current();
+    if (item == nullptr) {
+        return QString();
+    }
+    return item->metaObject()->className();
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {

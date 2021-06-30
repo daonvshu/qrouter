@@ -14,6 +14,10 @@ public:
 
     QStringList readStack();
 
+    QString currentName();
+
+    AbstractRouterWidget* current();
+
     void push(const QByteArray& pageClassName, const QVariant& data = QVariant());
     void pushReplace(const QByteArray& pageClassName, const QVariant& data = QVariant());
     void popAndPush();
