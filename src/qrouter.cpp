@@ -33,7 +33,7 @@ AbstractRouterWidget* QRouter::current() {
     if (item.stack.isEmpty()) {
         return nullptr;
     }
-    return item.stack.first();
+    return item.stack.last();
 }
 
 QString QRouter::currentName() {

@@ -24,7 +24,7 @@ public:
     void pushAndRemove();
     void pushAndClear(const QByteArray& pageClassName, const QVariant& data = QVariant());
 
-    void pop(const QVariant& data);
+    void pop(const QVariant& data = QVariant());
     void popUntil(const QByteArray& untilName);
 
     QVariant sendEvent(const QString& event, const QVariant& data = QVariant());
