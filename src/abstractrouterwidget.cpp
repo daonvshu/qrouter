@@ -1,5 +1,7 @@
 #include "abstractrouterwidget.h"
 
+#include "qrouter.h"
+
 AbstractRouterWidget::AbstractRouterWidget(const QVariant& data, QWidget* parent)
     : QWidget(parent)
     , navigateData(data)
@@ -49,6 +51,15 @@ void AbstractRouterWidget::resizeEvent(QResizeEvent*) {
 
 void AbstractRouterWidget::hideEvent(QHideEvent*) {
     onHidden();
+}
+
+bool AbstractRouterWidget::event(QEvent* event) {
+    if (event->type() == QRouterPageEvent::type) {
+        auto e = static_cast<QRouterPageEvent*>(event);
+        runRouterEvent(e->event, e->data);
+        return true;
+    }
+    return QWidget::event(event);
 }
 
 

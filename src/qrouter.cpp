@@ -1,5 +1,11 @@
 ﻿#include "qrouter.h"
 
+#include "abstractrouterwidget.h"
+
+#include <qapplication.h>
+
+QEvent::Type QRouterPageEvent::type = static_cast<QEvent::Type>(QEvent::registerEventType());
+
 QRouter QRouter::router;
 
 QRouter::QRouter()
@@ -111,13 +117,25 @@ void QRouter::popUntil(const QByteArray& untilName) {
     }
 }
 
-QVariant QRouter::sendEvent(const QString& event, const QVariant& data) {
+QVariant QRouter::sendEventCur(const QString& event, const QVariant& data) {
     auto& item = currentContainter();
     if (item.stack.isEmpty()) {
         return QVariant();
     }
 
     return item.stack.last()->onRouterEvent(event, data);
+}
+
+QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+
+    for (const auto& page: item.stack) {
+        if (page->metaObject()->className() == pageClassName) {
+            return page->onRouterEvent(event, data);
+        }
+    }
+
+    return QVariant();
 }
 
 void QRouter::sendEventAll(const QString& event, const QVariant& data) {
@@ -128,6 +146,43 @@ void QRouter::sendEventAll(const QString& event, const QVariant& data) {
     }
 }
 
+void QRouter::postEventCur(const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+    if (item.stack.isEmpty()) {
+        return;
+    }
+
+    QRouterPageEvent pageEvent(event, data);
+    return qApp->postEvent(item.stack.last(), &pageEvent);
+}
+
+void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+
+    QRouterPageEvent pageEvent(event, data);
+    for (const auto& page : item.stack) {
+        if (page->metaObject()->className() == pageClassName) {
+            qApp->postEvent(page, &pageEvent);
+            return;
+        }
+    }
+}
+
+void QRouter::postEventToRoot(const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+
+    QRouterPageEvent pageEvent(event, data);
+    qApp->postEvent(item.container->parent(), &pageEvent);
+}
+
+void QRouter::postEventAll(const QString& event, const QVariant& data) {
+    auto& item = currentContainter();
+
+    QRouterPageEvent pageEvent(event, data);
+    for (const auto& widget : item.stack) {
+        qApp->postEvent(widget, &pageEvent);
+    }
+}
 
 AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data) {
     int type = QMetaType::type(className + '*');

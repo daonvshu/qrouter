@@ -28,6 +28,8 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void hideEvent(QHideEvent* event) override;
 
+    bool event(QEvent* event) override;
+
     virtual void onViewLoad();
     virtual void onReshow();
     virtual void onHidden();

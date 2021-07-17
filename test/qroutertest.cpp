@@ -2,6 +2,8 @@
 
 #include "../src/qrouter.h"
 
+#include "pages/customdata.h"
+
 #include <qdatetime.h>
 #include <qdebug.h>
 
@@ -15,6 +17,20 @@ QRouterTest::QRouterTest(QWidget *parent)
     connect(ui.stackedWidget, &QStackedWidget::currentChanged, this, &QRouterTest::printPageStack);
 
     QRouter::of().push("TestPage1");
+
+
+    //test send event
+    connect(ui.btn_send1, &QPushButton::clicked, [&] {
+
+    });
+
+    connect(ui.btn_send_cur, &QPushButton::clicked, [&] {
+
+    });
+
+    connect(ui.btn_send_all, &QPushButton::clicked, [&] {
+
+    });
 }
 
 void QRouterTest::printPageStack() {

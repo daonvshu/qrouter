@@ -13,7 +13,45 @@
   <property name="windowTitle">
    <string>QRouter</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="btn_send1">
+       <property name="text">
+        <string>send event to page1</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_send_cur">
+       <property name="text">
+        <string>send event to page current</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_send_all">
+       <property name="text">
+        <string>send event to all page</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="styleSheet">

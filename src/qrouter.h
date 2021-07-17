@@ -2,9 +2,23 @@
 
 #include <qobject.h>
 #include <qstackedwidget.h>
+#include <qevent.h>
 
-#include "abstractrouterwidget.h"
+class QRouterPageEvent : public QEvent {
+public:
+    QRouterPageEvent(const QString& event, const QVariant& data)
+        : QEvent(type)
+        , event(event)
+        , data(data)
+    {}
 
+    static QEvent::Type type;
+
+    QString event;
+    QVariant data;
+};
+
+class AbstractRouterWidget;
 class QRouter {
 public:
 
@@ -27,8 +41,14 @@ public:
     void pop(const QVariant& data = QVariant());
     void popUntil(const QByteArray& untilName);
 
-    QVariant sendEvent(const QString& event, const QVariant& data = QVariant());
+    QVariant sendEventCur(const QString& event, const QVariant& data = QVariant());
+    QVariant sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant());
     void sendEventAll(const QString& event, const QVariant& data = QVariant());
+
+    void postEventCur(const QString& event, const QVariant& data = QVariant());
+    void postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant());
+    void postEventToRoot(const QString& event, const QVariant& data = QVariant());
+    void postEventAll(const QString& event, const QVariant& data = QVariant());
 
 private:
     QRouter();
