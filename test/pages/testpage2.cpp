@@ -5,6 +5,7 @@
 #include "customdata.h"
 
 #include <qdatetime.h>
+#include <qmessagebox.h>
 
 int TestPage2::typeId = qRegisterMetaType<TestPage2*>();
 
@@ -27,4 +28,12 @@ TestPage2::TestPage2(const QVariant& data, QWidget* parent)
         data.message = "close page2";
         QRouter::of().pop(QVariant::fromValue(data));
     });
+}
+
+bool TestPage2::attempClose() {
+    if (ui.block_pop->isChecked()) {
+        QMessageBox::warning(0, "warning", "page close blocked!");
+        return false;
+    }
+    return true;
 }

@@ -10,6 +10,8 @@ class TestPage2 : public AbstractRouterWidget {
 public:
     Q_INVOKABLE explicit TestPage2(const QVariant& data, QWidget* parent = nullptr);
 
+    bool attempClose() override;
+
 private:
     Ui::TestPage2 ui;
 
