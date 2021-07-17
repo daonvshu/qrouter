@@ -33,6 +33,15 @@
     <Filter Include="Header Files\src">
       <UniqueIdentifier>{3c1b15ea-0c97-490d-9e17-7f366ba65c0f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\test\pages">
+      <UniqueIdentifier>{ae656a10-eefa-466f-b0d0-65650ff1040d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\test\pages">
+      <UniqueIdentifier>{643226b3-f4c7-4d59-8438-f0e785ba056f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Files\pages">
+      <UniqueIdentifier>{7cecdc8d-801c-4e66-998d-0a2bc304e6c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\main.cpp">
@@ -47,6 +56,12 @@
     <ClCompile Include="src\qrouter.cpp">
       <Filter>Source Files\src</Filter>
     </ClCompile>
+    <ClCompile Include="test\pages\testpage1.cpp">
+      <Filter>Source Files\test\pages</Filter>
+    </ClCompile>
+    <ClCompile Include="test\pages\testpage2.cpp">
+      <Filter>Source Files\test\pages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="test\qrouter.qrc">
@@ -57,6 +72,12 @@
     <QtUic Include="test\qrouter.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="test\pages\page1.ui">
+      <Filter>Form Files\pages</Filter>
+    </QtUic>
+    <QtUic Include="test\pages\page2.ui">
+      <Filter>Form Files\pages</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\abstractrouterwidget.h">
@@ -65,10 +86,19 @@
     <ClInclude Include="src\qrouter.h">
       <Filter>Header Files\src</Filter>
     </ClInclude>
+    <ClInclude Include="test\pages\customdata.h">
+      <Filter>Header Files\test\pages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="test\qroutertest.h">
       <Filter>Header Files\test</Filter>
+    </QtMoc>
+    <QtMoc Include="test\pages\testpage1.h">
+      <Filter>Header Files\test\pages</Filter>
+    </QtMoc>
+    <QtMoc Include="test\pages\testpage2.h">
+      <Filter>Header Files\test\pages</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

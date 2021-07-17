@@ -12,4 +12,7 @@ public:
 
 private:
     Ui::QRouterClass ui;
+
+private:
+    void printPageStack();
 };

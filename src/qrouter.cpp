@@ -132,6 +132,7 @@ void QRouter::sendEventAll(const QString& event, const QVariant& data) {
 AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data) {
     int type = QMetaType::type(className + '*');
     auto metaObj = QMetaType::metaObjectForType(type);
+    Q_ASSERT_X(metaObj != nullptr, "qrouter reflect page class", "cannot reflect by name!");
 
     auto obj = metaObj->newInstance(Q_ARG(QVariant, data), Q_ARG(QWidget*, parent));
     AbstractRouterWidget* widget = dynamic_cast<AbstractRouterWidget*>(obj);

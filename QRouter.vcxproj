@@ -14,17 +14,24 @@
     <ClCompile Include="src\abstractrouterwidget.cpp" />
     <ClCompile Include="src\qrouter.cpp" />
     <ClCompile Include="test\main.cpp" />
+    <ClCompile Include="test\pages\testpage1.cpp" />
+    <ClCompile Include="test\pages\testpage2.cpp" />
     <ClCompile Include="test\qroutertest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="test\qrouter.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="test\pages\page1.ui" />
+    <QtUic Include="test\pages\page2.ui" />
     <QtUic Include="test\qrouter.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\abstractrouterwidget.h" />
     <ClInclude Include="src\qrouter.h" />
+    <ClInclude Include="test\pages\customdata.h" />
+    <QtMoc Include="test\pages\testpage2.h" />
+    <QtMoc Include="test\pages\testpage1.h" />
     <QtMoc Include="test\qroutertest.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

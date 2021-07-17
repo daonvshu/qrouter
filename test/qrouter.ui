@@ -1,25 +1,34 @@
-<UI version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>QRouterClass</class>
- <widget class="QWidget" name="QRouterClass" >
-  <property name="objectName" >
-   <string notr="true">QRouterClass</string>
-  </property>
-  <property name="geometry" >
+ <widget class="QWidget" name="QRouterClass">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>1030</width>
+    <height>682</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>QRouter</string>
-  </property>$centralwidget$
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <item>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="styleSheet">
+      <string notr="true">QStackedWidget{border:1px solid red;}</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextBrowser" name="log_view"/>
+   </item>
+  </layout>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
+ <layoutdefault spacing="6" margin="11"/>
  <resources>
-   <include location="qrouter.qrc"/>
+  <include location="qrouter.qrc"/>
  </resources>
  <connections/>
-</UI>
+</ui>
