@@ -15,4 +15,7 @@ private:
 
 private:
     void printPageStack();
+
+protected:
+    bool event(QEvent* event) override;
 };

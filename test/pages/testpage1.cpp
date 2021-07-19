@@ -32,3 +32,9 @@ void TestPage1::onNavigateResult(const QVariant& data) {
         .arg(value.message)
     );
 }
+
+void TestPage1::runRouterEvent(const QString& event, const QVariant& data) {
+    if (event == "eventtest") {
+        QRouter::of().postEventToRoot("printevent", "test page1 receive event!");
+    }
+}

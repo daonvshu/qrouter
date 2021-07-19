@@ -37,3 +37,9 @@ bool TestPage2::attempClose() {
     }
     return true;
 }
+
+void TestPage2::runRouterEvent(const QString& event, const QVariant& data) {
+    if (event == "eventtest") {
+        QRouter::of().postEventToRoot("printevent", "test page2 receive event!");
+    }
+}

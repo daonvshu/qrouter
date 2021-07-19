@@ -38,6 +38,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="send_by_post">
+       <property name="text">
+        <string>post method</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

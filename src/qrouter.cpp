@@ -152,17 +152,15 @@ void QRouter::postEventCur(const QString& event, const QVariant& data) {
         return;
     }
 
-    QRouterPageEvent pageEvent(event, data);
-    return qApp->postEvent(item.stack.last(), &pageEvent);
+    return qApp->postEvent(item.stack.last(), new QRouterPageEvent(event, data));
 }
 
 void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
     auto& item = currentContainter();
 
-    QRouterPageEvent pageEvent(event, data);
     for (const auto& page : item.stack) {
         if (page->metaObject()->className() == pageClassName) {
-            qApp->postEvent(page, &pageEvent);
+            qApp->postEvent(page, new QRouterPageEvent(event, data));
             return;
         }
     }
@@ -171,16 +169,14 @@ void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event,
 void QRouter::postEventToRoot(const QString& event, const QVariant& data) {
     auto& item = currentContainter();
 
-    QRouterPageEvent pageEvent(event, data);
-    qApp->postEvent(item.container->parent(), &pageEvent);
+    qApp->postEvent(item.container->parent(), new QRouterPageEvent(event, data));
 }
 
 void QRouter::postEventAll(const QString& event, const QVariant& data) {
     auto& item = currentContainter();
 
-    QRouterPageEvent pageEvent(event, data);
     for (const auto& widget : item.stack) {
-        qApp->postEvent(widget, &pageEvent);
+        qApp->postEvent(widget, new QRouterPageEvent(event, data));
     }
 }
 

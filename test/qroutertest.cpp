@@ -21,15 +21,27 @@ QRouterTest::QRouterTest(QWidget *parent)
 
     //test send event
     connect(ui.btn_send1, &QPushButton::clicked, [&] {
-
+        if (ui.send_by_post->isChecked()) {
+            QRouter::of().postEventTo("TestPage1", "eventtest");
+        } else {
+            QRouter::of().sendEventTo("TestPage1", "eventtest");
+        }
     });
 
     connect(ui.btn_send_cur, &QPushButton::clicked, [&] {
-
+        if (ui.send_by_post->isChecked()) {
+            QRouter::of().postEventCur("eventtest");
+        } else {
+            QRouter::of().sendEventCur("eventtest");
+        }
     });
 
     connect(ui.btn_send_all, &QPushButton::clicked, [&] {
-
+        if (ui.send_by_post->isChecked()) {
+            QRouter::of().postEventAll("eventtest");
+        } else {
+            QRouter::of().sendEventAll("eventtest");
+        }
     });
 }
 
@@ -37,5 +49,17 @@ void QRouterTest::printPageStack() {
     QString stackString;
     QDebug(&stackString) << QRouter::of().readStack();
 
-    ui.log_view->append(QString("[%1] page stack: %2\n").arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz")).arg(stackString));
+    ui.log_view->append(QString("[%1] page stack: %2\n")
+        .arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"))
+        .arg(stackString));
+}
+
+bool QRouterTest::event(QEvent* event) {
+    if (event->type() == QRouterPageEvent::type) {
+        ui.log_view->append(QString("[%1] receive router event: %2\n")
+            .arg(QDateTime::currentDateTime().toString("HH:mm:ss.zzz"))
+            .arg(static_cast<QRouterPageEvent*>(event)->data.toString()));
+        return true;
+    }
+    return QWidget::event(event);
 }
