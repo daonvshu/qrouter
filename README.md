@@ -95,7 +95,7 @@ QRouter::install(ui.stackedWidget, 0);
 CustomData data;
 data.message = "send data from page1 to page2";
 
-//从页面1跳转到page2
+//从页面1跳转到page2，"Page2"为页面2的类名，of函数传递页面栈id，默认id为0的页面栈
 QRouter::of().push("Page2", QVariant::fromValue(data));
 
 //从页面栈移除当前页面1并跳转到页面2
