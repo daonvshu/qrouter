@@ -1,6 +1,6 @@
 #include "qroutertest.h"
 
-#include "../src/qrouter.h"
+#include "qrouter.h"
 
 #include "pages/customdata.h"
 

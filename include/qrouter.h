@@ -3,6 +3,7 @@
 #include <qobject.h>
 #include <qstackedwidget.h>
 #include <qevent.h>
+#include <qeasingcurve.h>
 
 class QRouterPageEvent : public QEvent {
 public:
@@ -49,6 +50,11 @@ public:
     void postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant());
     void postEventToRoot(const QString& event, const QVariant& data = QVariant());
     void postEventAll(const QString& event, const QVariant& data = QVariant());
+
+    QRouter& alpha(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
+    QRouter& translate(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
+    QRouter& scale(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
+    QRouter& rotate(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
 
 private:
     QRouter();

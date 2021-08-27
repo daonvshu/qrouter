@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "../../src/abstractrouterwidget.h"
+#include "abstractrouterwidget.h"
 
 #include <ui_page2.h>
 
