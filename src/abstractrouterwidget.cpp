@@ -11,7 +11,7 @@ AbstractRouterWidget::AbstractRouterWidget(const QVariant& data, QWidget* parent
 void AbstractRouterWidget::onNavigateResult(const QVariant&) {
 }
 
-bool AbstractRouterWidget::attempClose() {
+bool AbstractRouterWidget::attemptClose() {
     return true;
 }
 

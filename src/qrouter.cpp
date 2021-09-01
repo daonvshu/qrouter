@@ -27,7 +27,7 @@ QRouter& QRouter::of(int contextId) {
 QStringList QRouter::readStack() {
     QStringList stackNames;
 
-    auto& item = currentContainter();
+    auto& item = currentContainer();
     for (const auto& i : item.stack) {
         stackNames << i->metaObject()->className();
     }
@@ -35,7 +35,7 @@ QStringList QRouter::readStack() {
 }
 
 AbstractRouterWidget* QRouter::current() {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
     if (item.stack.isEmpty()) {
         return nullptr;
     }
@@ -51,7 +51,7 @@ QString QRouter::currentName() {
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     auto widget = reflectByName(pageClassName, item.container, data);
     item.stack.append(widget);
@@ -61,7 +61,7 @@ void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
 }
 
 void QRouter::pushReplace(const QByteArray& pageClassName, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     if (!item.stack.isEmpty()) {
         auto widget = item.stack.takeLast();
@@ -73,7 +73,7 @@ void QRouter::pushReplace(const QByteArray& pageClassName, const QVariant& data)
 }
 
 void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     while (!item.stack.isEmpty()) {
         auto widget = item.stack.takeLast();
@@ -85,10 +85,10 @@ void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data
 }
 
 void QRouter::pop(const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     if (!item.stack.isEmpty()) {
-        if (item.stack.last()->attempClose()) {
+        if (item.stack.last()->attemptClose()) {
             auto widget = item.stack.takeLast();
             item.container->removeWidget(widget);
             widget->deleteLater();
@@ -100,10 +100,10 @@ void QRouter::pop(const QVariant& data) {
 }
 
 void QRouter::popUntil(const QByteArray& untilName) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     while (!item.stack.isEmpty() && item.stack.last()->metaObject()->className() != untilName) {
-        if (!item.stack.last()->attempClose()) {
+        if (!item.stack.last()->attemptClose()) {
             item.container->setCurrentWidget(item.stack.last());
             return;
         }
@@ -118,7 +118,7 @@ void QRouter::popUntil(const QByteArray& untilName) {
 }
 
 QVariant QRouter::sendEventCur(const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
     if (item.stack.isEmpty()) {
         return QVariant();
     }
@@ -127,7 +127,7 @@ QVariant QRouter::sendEventCur(const QString& event, const QVariant& data) {
 }
 
 QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     for (const auto& page: item.stack) {
         if (page->metaObject()->className() == pageClassName) {
@@ -139,7 +139,7 @@ QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& ev
 }
 
 void QRouter::sendEventAll(const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     for (const auto& widget: item.stack) {
         widget->onRouterEvent(event, data);
@@ -147,7 +147,7 @@ void QRouter::sendEventAll(const QString& event, const QVariant& data) {
 }
 
 void QRouter::postEventCur(const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
     if (item.stack.isEmpty()) {
         return;
     }
@@ -156,7 +156,7 @@ void QRouter::postEventCur(const QString& event, const QVariant& data) {
 }
 
 void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     for (const auto& page : item.stack) {
         if (page->metaObject()->className() == pageClassName) {
@@ -167,13 +167,13 @@ void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event,
 }
 
 void QRouter::postEventToRoot(const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     qApp->postEvent(item.container->parent(), new QRouterPageEvent(event, data));
 }
 
 void QRouter::postEventAll(const QString& event, const QVariant& data) {
-    auto& item = currentContainter();
+    auto& item = currentContainer();
 
     for (const auto& widget : item.stack) {
         qApp->postEvent(widget, new QRouterPageEvent(event, data));
@@ -192,7 +192,7 @@ AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidge
     return widget;
 }
 
-QRouter::RouterContainerItem& QRouter::currentContainter() {
+QRouter::RouterContainerItem& QRouter::currentContainer() {
     Q_ASSERT_X(containers.contains(m_curContextId), "get current containter", "cannot find context id!");
 
     return containers[m_curContextId];

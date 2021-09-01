@@ -30,7 +30,7 @@ TestPage2::TestPage2(const QVariant& data, QWidget* parent)
     });
 }
 
-bool TestPage2::attempClose() {
+bool TestPage2::attemptClose() {
     if (ui.block_pop->isChecked()) {
         QMessageBox::warning(0, "warning", "page close blocked!");
         return false;

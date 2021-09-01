@@ -9,7 +9,7 @@ public:
 
     virtual void onNavigateResult(const QVariant& data);
 
-    virtual bool attempClose();
+    virtual bool attemptClose();
 
     QVariant onRouterEvent(const QString& event, const QVariant& data);
 

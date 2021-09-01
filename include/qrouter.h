@@ -73,5 +73,5 @@ private:
 private:
     AbstractRouterWidget* reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data);
 
-    RouterContainerItem& currentContainter();
+    RouterContainerItem& currentContainer();
 };
