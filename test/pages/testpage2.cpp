@@ -22,12 +22,7 @@ TestPage2::TestPage2(const QVariant& data, QWidget* parent)
         .arg(value.message)
     );
 
-    connect(ui.btn_pop, &QPushButton::clicked, [&] {
-        CustomData data;
-        data.sendTime = QDateTime::currentMSecsSinceEpoch();
-        data.message = "close page2";
-        QRouter::of().pop(QVariant::fromValue(data));
-    });
+    connect(ui.btn_pop, &QPushButton::clicked, this, &TestPage2::popWithData);
 }
 
 bool TestPage2::attemptClose() {
@@ -38,8 +33,25 @@ bool TestPage2::attemptClose() {
     return true;
 }
 
+QVariant TestPage2::readAttemptCloseData() {
+    CustomData data;
+    data.sendTime = QDateTime::currentMSecsSinceEpoch();
+    data.message = "close page2";
+    return QVariant::fromValue(data);
+}
+
 void TestPage2::runRouterEvent(const QString& event, const QVariant& data) {
     if (event == "eventtest") {
         QRouter::of().postEventToRoot("printevent", "test page2 receive event!");
+    }
+}
+
+void TestPage2::popWithData() {
+    if (ui.pop_data_extra->isChecked()) {
+        auto d = readAttemptCloseData().value<CustomData>();
+        d.message += " with extra";
+        QRouter::of().pop(QVariant::fromValue(d));
+    } else {
+        QRouter::of().pop();
     }
 }

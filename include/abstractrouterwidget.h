@@ -11,6 +11,8 @@ public:
 
     virtual bool attemptClose();
 
+    virtual QVariant readAttemptCloseData();
+
     QVariant onRouterEvent(const QString& event, const QVariant& data);
 
 private:

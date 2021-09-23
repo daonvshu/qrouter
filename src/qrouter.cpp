@@ -84,12 +84,15 @@ void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data
     push(pageClassName, data);
 }
 
-void QRouter::pop(const QVariant& data) {
+void QRouter::pop(QVariant data) {
     auto& item = currentContainer();
 
     if (!item.stack.isEmpty()) {
         if (item.stack.last()->attemptClose()) {
             auto widget = item.stack.takeLast();
+            if (data.isNull()) {
+                data = widget->readAttemptCloseData();
+            }
             item.container->removeWidget(widget);
             widget->deleteLater();
 

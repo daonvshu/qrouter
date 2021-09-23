@@ -12,6 +12,8 @@ public:
 
     bool attemptClose() override;
 
+    QVariant readAttemptCloseData() override;
+
 private:
     Ui::TestPage2 ui;
 
@@ -19,6 +21,9 @@ private:
 
 protected:
     void runRouterEvent(const QString& event, const QVariant& data) override;
+
+private:
+    void popWithData();
 };
 
 Q_DECLARE_METATYPE(TestPage2*);

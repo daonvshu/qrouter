@@ -15,6 +15,10 @@ bool AbstractRouterWidget::attemptClose() {
     return true;
 }
 
+QVariant AbstractRouterWidget::readAttemptCloseData() {
+    return QVariant();
+}
+
 QVariant AbstractRouterWidget::onRouterEvent(const QString& event, const QVariant& data) {
     runRouterEvent(event, data);
 
