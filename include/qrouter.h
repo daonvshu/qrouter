@@ -33,14 +33,19 @@ public:
 
     AbstractRouterWidget* current();
 
+    void initStack(const QList<QByteArray>& pages);
+
     void push(const QByteArray& pageClassName, const QVariant& data = QVariant());
     void pushReplace(const QByteArray& pageClassName, const QVariant& data = QVariant());
     void popAndPush();
     void pushAndRemove();
     void pushAndClear(const QByteArray& pageClassName, const QVariant& data = QVariant());
 
+    bool move2Top(const QByteArray& pageClassName);
+
     void pop(QVariant data = QVariant());
     void popUntil(const QByteArray& untilName);
+    void popUntil(int stackSize);
 
     QVariant sendEventCur(const QString& event, const QVariant& data = QVariant());
     QVariant sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant());

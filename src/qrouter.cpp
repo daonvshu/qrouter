@@ -50,6 +50,12 @@ QString QRouter::currentName() {
     return item->metaObject()->className();
 }
 
+void QRouter::initStack(const QList<QByteArray>& pages) {
+    for (const auto& page: pages) {
+        push(page);
+    }
+}
+
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
     auto& item = currentContainer();
 
@@ -82,6 +88,27 @@ void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data
     }
 
     push(pageClassName, data);
+}
+
+bool QRouter::move2Top(const QByteArray& pageClassName) {
+    auto& item = currentContainer();
+
+    AbstractRouterWidget* widgetTag = nullptr;
+    for (int i=0; i<item.stack.size(); i++) {
+        if (item.stack.at(i)->metaObject()->className() == pageClassName) {
+            widgetTag = item.stack.takeAt(i);
+            break;
+        }
+    }
+
+    if (widgetTag == nullptr) {
+        return false;
+    }
+
+    item.stack.append(widgetTag);
+    item.container->setCurrentWidget(widgetTag);
+
+    return true;
 }
 
 void QRouter::pop(QVariant data) {
@@ -119,6 +146,21 @@ void QRouter::popUntil(const QByteArray& untilName) {
         item.container->setCurrentWidget(item.stack.last());
     }
 }
+
+void QRouter::popUntil(int stackSize) {
+    auto& item = currentContainer();
+
+    while (item.stack.size() > stackSize) {
+        auto widget = item.stack.takeLast();
+        item.container->removeWidget(widget);
+        widget->deleteLater();
+    }
+
+    if (!item.stack.isEmpty()) {
+        item.container->setCurrentWidget(item.stack.last());
+    }
+}
+
 
 QVariant QRouter::sendEventCur(const QString& event, const QVariant& data) {
     auto& item = currentContainer();

@@ -95,6 +95,9 @@ QRouter::install(ui.stackedWidget, 0);
 CustomData data;
 data.message = "send data from page1 to page2";
 
+//初始化并创建页面栈
+QRouter::of().initStack({"Page1", "Page2"});
+
 //从页面1跳转到page2，"Page2"为页面2的类名，of函数传递页面栈id，默认id为0的页面栈
 QRouter::of().push("Page2", QVariant::fromValue(data));
 
@@ -104,11 +107,17 @@ QRouter::of().pushReplace("Page2", QVariant::fromValue(data));
 //清除当前页面栈并跳转到页面2
 QRouter::of().pushAndClear("Page2", QVariant::fromValue(data));
 
+//将页面2移动到栈顶
+QRouter::of().move2Top("Page2");
+
 //关闭当前页面，并向上个页面传递数据
 QRouter::of().pop(QVariant::fromValue(data));
 
 //关闭页面栈Page2上面的所有页面
 QRouter::of().popUntil("Page2", QVariant::fromValue(data));
+
+//页面栈只保留4个页面，并关闭栈之上的所有页面
+QRouter::of().popUntil(4);
 ```
 
 ### 4. 发送事件
