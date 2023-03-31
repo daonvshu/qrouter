@@ -25,6 +25,10 @@ QVariant AbstractRouterWidget::onRouterEvent(const QString& event, const QVarian
     return executeRouterEvent(event, data);
 }
 
+bool AbstractRouterWidget::singletonInstance() {
+    return false;
+}
+
 QVariant AbstractRouterWidget::getNavigateData(bool clear) {
     auto data = navigateData;
     if (clear) {

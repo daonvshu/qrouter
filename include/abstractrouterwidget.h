@@ -15,6 +15,8 @@ public:
 
     QVariant onRouterEvent(const QString& event, const QVariant& data);
 
+    virtual bool singletonInstance();
+
 private:
     QVariant navigateData;
     bool firstShow;

@@ -45,7 +45,7 @@ AbstractRouterWidget* QRouter::current() {
 QString QRouter::currentName() {
     auto item = current();
     if (item == nullptr) {
-        return QString();
+        return {};
     }
     return item->metaObject()->className();
 }
@@ -59,7 +59,12 @@ void QRouter::initStack(const QList<QByteArray>& pages) {
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
     auto& item = currentContainer();
 
-    auto widget = reflectByName(pageClassName, item.container, data);
+    AbstractRouterWidget* widget;
+    if (keepSingletonPageInstance.contains(pageClassName)) {
+        widget = keepSingletonPageInstance.take(pageClassName);
+    } else {
+        widget = reflectByName(pageClassName, item.container, data);
+    }
     item.stack.append(widget);
 
     item.container->addWidget(widget);
@@ -72,7 +77,7 @@ void QRouter::pushReplace(const QByteArray& pageClassName, const QVariant& data)
     if (!item.stack.isEmpty()) {
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
-        widget->deleteLater();
+        removePageInstance(widget);
     }
 
     push(pageClassName, data);
@@ -84,7 +89,7 @@ void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data
     while (!item.stack.isEmpty()) {
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
-        widget->deleteLater();
+        removePageInstance(widget);
     }
 
     push(pageClassName, data);
@@ -102,7 +107,11 @@ bool QRouter::move2Top(const QByteArray& pageClassName) {
     }
 
     if (widgetTag == nullptr) {
-        return false;
+        if (keepSingletonPageInstance.contains(pageClassName)) {
+            widgetTag = keepSingletonPageInstance.take(pageClassName);
+        } else {
+            return false;
+        }
     }
 
     item.stack.append(widgetTag);
@@ -121,7 +130,7 @@ void QRouter::pop(QVariant data) {
                 data = widget->readAttemptCloseData();
             }
             item.container->removeWidget(widget);
-            widget->deleteLater();
+            removePageInstance(widget);
 
             item.container->setCurrentWidget(item.stack.last());
             item.stack.last()->onNavigateResult(data);
@@ -139,7 +148,7 @@ void QRouter::popUntil(const QByteArray& untilName) {
         }
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
-        widget->deleteLater();
+        removePageInstance(widget);
     }
 
     if (!item.stack.isEmpty()) {
@@ -153,7 +162,7 @@ void QRouter::popUntil(int stackSize) {
     while (item.stack.size() > stackSize) {
         auto widget = item.stack.takeLast();
         item.container->removeWidget(widget);
-        widget->deleteLater();
+        removePageInstance(widget);
     }
 
     if (!item.stack.isEmpty()) {
@@ -165,7 +174,7 @@ void QRouter::popUntil(int stackSize) {
 QVariant QRouter::sendEventCur(const QString& event, const QVariant& data) {
     auto& item = currentContainer();
     if (item.stack.isEmpty()) {
-        return QVariant();
+        return {};
     }
 
     return item.stack.last()->onRouterEvent(event, data);
@@ -180,7 +189,11 @@ QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& ev
         }
     }
 
-    return QVariant();
+    if (keepSingletonPageInstance.contains(pageClassName)) {
+        return keepSingletonPageInstance[pageClassName]->onRouterEvent(event, data);
+    }
+
+    return {};
 }
 
 void QRouter::sendEventAll(const QString& event, const QVariant& data) {
@@ -188,6 +201,10 @@ void QRouter::sendEventAll(const QString& event, const QVariant& data) {
 
     for (const auto& widget: item.stack) {
         widget->onRouterEvent(event, data);
+    }
+
+    for (auto i = keepSingletonPageInstance.begin(); i != keepSingletonPageInstance.end(); ++i) {
+        i.value()->onRouterEvent(event, data);
     }
 }
 
@@ -209,6 +226,10 @@ void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event,
             return;
         }
     }
+
+    if (keepSingletonPageInstance.contains(pageClassName)) {
+        qApp->postEvent(keepSingletonPageInstance[pageClassName], new QRouterPageEvent(event, data));
+    }
 }
 
 void QRouter::postEventToRoot(const QString& event, const QVariant& data) {
@@ -223,6 +244,10 @@ void QRouter::postEventAll(const QString& event, const QVariant& data) {
     for (const auto& widget : item.stack) {
         qApp->postEvent(widget, new QRouterPageEvent(event, data));
     }
+
+    for (auto i = keepSingletonPageInstance.begin(); i != keepSingletonPageInstance.end(); ++i) {
+        qApp->postEvent(i.value(), new QRouterPageEvent(event, data));
+    }
 }
 
 AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data) {
@@ -231,7 +256,7 @@ AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidge
     Q_ASSERT_X(metaObj != nullptr, "qrouter reflect page class", "cannot reflect by name!");
 
     auto obj = metaObj->newInstance(Q_ARG(QVariant, data), Q_ARG(QWidget*, parent));
-    AbstractRouterWidget* widget = dynamic_cast<AbstractRouterWidget*>(obj);
+    auto widget = dynamic_cast<AbstractRouterWidget*>(obj);
     Q_ASSERT_X(widget != nullptr, "qrouter reflect page class", "cannot reflect by name!");
 
     return widget;
@@ -241,5 +266,13 @@ QRouter::RouterContainerItem& QRouter::currentContainer() {
     Q_ASSERT_X(containers.contains(m_curContextId), "get current containter", "cannot find context id!");
 
     return containers[m_curContextId];
+}
+
+void QRouter::removePageInstance(AbstractRouterWidget *widget) {
+    if (widget->singletonInstance()) {
+        keepSingletonPageInstance.insert(widget->metaObject()->className(), widget);
+    } else {
+        widget->deleteLater();
+    }
 }
 
