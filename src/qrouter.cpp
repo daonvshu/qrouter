@@ -51,9 +51,16 @@ QString QRouter::currentName() {
 }
 
 void QRouter::initStack(const QList<QByteArray>& pages) {
-    for (const auto& page: pages) {
-        push(page);
+    if (pages.isEmpty()) {
+        return;
     }
+    auto& item = currentContainer();
+    for (const auto& page: pages) {
+        auto widget = reflectByName(page, item.container, {});
+        item.stack.append(widget);
+        item.container->addWidget(widget);
+    }
+    item.container->setCurrentWidget(item.stack.last());
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
@@ -63,6 +70,14 @@ void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
     if (keepSingletonPageInstance.contains(pageClassName)) {
         widget = keepSingletonPageInstance.take(pageClassName);
     } else {
+        for (auto p : item.stack) {
+            if (p->metaObject()->className() == pageClassName) {
+                if (p->singletonInstance()) {
+                    move2Top(pageClassName);
+                    return;
+                }
+            }
+        }
         widget = reflectByName(pageClassName, item.container, data);
     }
     item.stack.append(widget);
