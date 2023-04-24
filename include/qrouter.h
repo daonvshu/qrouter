@@ -77,8 +77,12 @@ private:
     QHash<int, RouterContainerItem> containers;
     QHash<QThread*, int> m_curContextId;
 
+    QHash<QString, AbstractRouterWidget*> keepSingletonPageInstance;
+
 private:
-    AbstractRouterWidget* reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data);
+    static AbstractRouterWidget* reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data);
 
     RouterContainerItem& currentContainer();
+
+    void removePageInstance(AbstractRouterWidget* widget);
 };
