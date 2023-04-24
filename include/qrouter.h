@@ -4,6 +4,8 @@
 #include <qstackedwidget.h>
 #include <qevent.h>
 #include <qeasingcurve.h>
+#include <qthread.h>
+#include <qhash.h>
 
 class QRouterPageEvent : public QEvent {
 public:
@@ -73,7 +75,7 @@ private:
     };
 
     QHash<int, RouterContainerItem> containers;
-    int m_curContextId;
+    QHash<QThread*, int> m_curContextId;
 
 private:
     AbstractRouterWidget* reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data);

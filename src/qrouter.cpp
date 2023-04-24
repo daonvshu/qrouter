@@ -9,7 +9,6 @@ QEvent::Type QRouterPageEvent::type = static_cast<QEvent::Type>(QEvent::register
 QRouter QRouter::router;
 
 QRouter::QRouter()
-    : m_curContextId(0)
 {}
 
 QRouter& QRouter::install(QStackedWidget* stackContainer, int contextId) {
@@ -20,7 +19,7 @@ QRouter& QRouter::install(QStackedWidget* stackContainer, int contextId) {
 }
 
 QRouter& QRouter::of(int contextId) {
-    router.m_curContextId = contextId;
+    router.m_curContextId.insert(QThread::currentThread(), contextId);
     return router;
 }
 
@@ -57,6 +56,7 @@ void QRouter::initStack(const QList<QByteArray>& pages) {
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
     auto& item = currentContainer();
 
     auto widget = reflectByName(pageClassName, item.container, data);
@@ -238,8 +238,9 @@ AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidge
 }
 
 QRouter::RouterContainerItem& QRouter::currentContainer() {
-    Q_ASSERT_X(containers.contains(m_curContextId), "get current containter", "cannot find context id!");
+    int id = m_curContextId.value(QThread::currentThread());
+    Q_ASSERT_X(containers.contains(id), "get current containter", "cannot find context id!");
 
-    return containers[m_curContextId];
+    return containers[id];
 }
 
