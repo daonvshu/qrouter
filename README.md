@@ -104,6 +104,15 @@ QRouter::of().push("Page2", QVariant::fromValue(data));
 //从页面栈移除当前页面1并跳转到页面2
 QRouter::of().pushReplace("Page2", QVariant::fromValue(data));
 
+//创建新页面page2并入栈，如果page2已经存在，则移动到栈顶
+QRouter::of().pushOrMove2Top("Page2", QVariant::fromValue(data));
+
+//尝试从页面栈移除当前页面1（如果可以关闭页面1）并跳转到页面2
+QRouter::of().popAndPush("Page2", QVariant::fromValue(data));
+
+//关闭指定页面2，页面2不一定在栈顶
+QRouter::of().close("Page2");
+
 //清除当前页面栈并跳转到页面2
 QRouter::of().pushAndClear("Page2", QVariant::fromValue(data));
 
@@ -118,6 +127,25 @@ QRouter::of().popUntil("Page2", QVariant::fromValue(data));
 
 //页面栈只保留4个页面，并关闭栈之上的所有页面
 QRouter::of().popUntil(4);
+
+//其他功能函数
+
+//读取当前页面栈所有页面名称
+QRouter::of().readStack();
+
+//获取当前栈顶页面名
+QRouter::of().currentName();
+
+//获取当前栈栈顶实例
+QRouter::of().current();
+QRouter::currentInstance<MyPage>();
+
+//从当前页面栈中获取指定页面实例
+QRouter::of().getInstanceFromStack("MyPage");
+QRouter::getInstance<MyPage>("MyPage");
+
+//获取页面栈容器的id
+QRouter::getIdByContainer(ui.page_container);
 ```
 
 ### 4. 发送事件
@@ -151,9 +179,16 @@ bool event(QEvent* event) override {
     }
     return QWidget::event(event);
 }
-```
 
-## Todo
-- popAndPush
-- pushAndRemove
-- animation
+//父页面必须是stackWidget的parent，否则使用eventFilter接收事件
+ui.page_container->parent()->installEventFilter(this);
+bool eventFilter(QObject *watched, QEvent *event) override {
+    if (event->type() == QRouterPageEvent::type) {
+        if (watched == ui.page_container->parent()) {
+            //do something...
+        }
+        return true;
+    }
+    return QWidget::eventFilter(watched, event);
+}
+```

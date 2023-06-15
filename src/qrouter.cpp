@@ -49,6 +49,35 @@ QString QRouter::currentName() {
     return item->metaObject()->className();
 }
 
+AbstractRouterWidget *QRouter::getInstanceFromStack(const QByteArray &pageClassName) {
+    auto& item = currentContainer();
+
+    AbstractRouterWidget* widgetTag = nullptr;
+    for (int i=0; i<item.stack.size(); i++) {
+        if (item.stack.at(i)->metaObject()->className() == pageClassName) {
+            widgetTag = item.stack.takeAt(i);
+            break;
+        }
+    }
+
+    if (widgetTag == nullptr) {
+        if (keepSingletonPageInstance.contains(pageClassName)) {
+            widgetTag = keepSingletonPageInstance.take(pageClassName);
+        }
+    }
+
+    return widgetTag;
+}
+
+int QRouter::getIdByContainer(QStackedWidget *container) {
+    for (auto i = router.containers.begin(); i != router.containers.end(); ++i) {
+        if (i->container == container) {
+            return i.key();
+        }
+    }
+    return -1;
+}
+
 void QRouter::initStack(const QList<QByteArray>& pages) {
     if (pages.isEmpty()) {
         return;
@@ -96,6 +125,49 @@ void QRouter::pushReplace(const QByteArray& pageClassName, const QVariant& data)
     }
 
     push(pageClassName, data);
+}
+
+bool QRouter::pushOrMove2Top(const QByteArray &pageClassName, const QVariant &data) {
+    if (move2Top(pageClassName)) {
+        return true;
+    }
+    push(pageClassName, data);
+    return false;
+}
+
+void QRouter::popAndPush(const QByteArray &pageClassName, const QVariant& data) {
+    auto& item = currentContainer();
+
+    if (!item.stack.isEmpty()) {
+        if (item.stack.last()->attemptClose()) {
+            auto widget = item.stack.takeLast();
+            item.container->removeWidget(widget);
+            removePageInstance(widget);
+        } else {
+            return;
+        }
+    }
+
+    push(pageClassName, data);
+}
+
+void QRouter::close(const QByteArray &pageClassName) {
+    auto& item = currentContainer();
+
+    bool isLast = false;
+    for (int i=0; i<item.stack.size(); i++) {
+        if (item.stack.at(i)->metaObject()->className() == pageClassName) {
+            isLast = i == item.stack.size() - 1;
+            auto widget = item.stack.takeAt(i);
+            item.container->removeWidget(widget);
+            removePageInstance(widget);
+            break;
+        }
+    }
+
+    if (isLast) {
+        item.container->setCurrentWidget(item.stack.last());
+    }
 }
 
 void QRouter::pushAndClear(const QByteArray& pageClassName, const QVariant& data) {
@@ -266,8 +338,12 @@ void QRouter::postEventAll(const QString& event, const QVariant& data) {
 }
 
 AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data) {
+#if QT_VERSION_MAJOR >= 6
+    const auto metaObj = QMetaType::fromName(className + '*').metaObject();
+#else
     int type = QMetaType::type(className + '*');
-    auto metaObj = QMetaType::metaObjectForType(type);
+    const auto metaObj = QMetaType::metaObjectForType(type);
+#endif
     Q_ASSERT_X(metaObj != nullptr, "qrouter reflect page class", "cannot reflect by name!");
 
     auto obj = metaObj->newInstance(Q_ARG(QVariant, data), Q_ARG(QWidget*, parent));
