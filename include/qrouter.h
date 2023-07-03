@@ -78,13 +78,12 @@ public:
     /**
      * Get instance by name in current page stack, return null if not exist
      * @tparam T instance type
-     * @param pageClassName
      * @param contextId page id
      * @return
      */
     template<typename T>
-    static T* getInstance(const QByteArray& pageClassName, int contextId = 0) {
-        return dynamic_cast<T*>(QRouter::of(contextId).getInstanceFromStack(pageClassName));
+    static T* getInstance(int contextId = 0) {
+        return dynamic_cast<T*>(QRouter::of(contextId).getInstanceFromStack(T::staticMetaObject.className()));
     }
 
     /**

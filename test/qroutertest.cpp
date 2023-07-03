@@ -4,6 +4,8 @@
 
 #include "pages/customdata.h"
 
+#include "pages/testpage1.h"
+
 #include <qdatetime.h>
 #include <qdebug.h>
 
@@ -22,6 +24,8 @@ QRouterTest::QRouterTest(QWidget *parent)
     //test send event
     connect(ui.btn_send1, &QPushButton::clicked, [&] {
         if (ui.send_by_post->isChecked()) {
+            auto ptr = QRouter::getInstance<TestPage1>();
+            Q_ASSERT(ptr != nullptr);
             QRouter::of().postEventTo("TestPage1", "eventtest");
         } else {
             QRouter::of().sendEventTo("TestPage1", "eventtest");

@@ -55,14 +55,14 @@ AbstractRouterWidget *QRouter::getInstanceFromStack(const QByteArray &pageClassN
     AbstractRouterWidget* widgetTag = nullptr;
     for (int i=0; i<item.stack.size(); i++) {
         if (item.stack.at(i)->metaObject()->className() == pageClassName) {
-            widgetTag = item.stack.takeAt(i);
+            widgetTag = item.stack.value(i);
             break;
         }
     }
 
     if (widgetTag == nullptr) {
         if (keepSingletonPageInstance.contains(pageClassName)) {
-            widgetTag = keepSingletonPageInstance.take(pageClassName);
+            widgetTag = keepSingletonPageInstance.value(pageClassName);
         }
     }
 
