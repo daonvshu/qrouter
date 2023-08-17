@@ -84,15 +84,22 @@ void QRouter::initStack(const QList<QByteArray>& pages) {
     }
     auto& item = currentContainer();
     for (const auto& page: pages) {
-        auto widget = reflectByName(page, item.container, {});
-        item.stack.append(widget);
-        item.container->addWidget(widget);
+        try {
+            auto widget = reflectByName(page, item.container, {});
+            item.stack.append(widget);
+            item.container->addWidget(widget);
+        } catch (QRouterRuntimeException& e) {
+            qFatal(e.message.toLatin1().data());
+        }
     }
     item.container->setCurrentWidget(item.stack.last());
 }
 
 void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
-    Q_ASSERT(QThread::currentThread() == qApp->thread());
+    if (QThread::currentThread() != qApp->thread()) {
+        throw QRouterRuntimeException("cannot push a page in work thread!");
+    }
+
     auto& item = currentContainer();
 
     AbstractRouterWidget* widget;
@@ -107,7 +114,11 @@ void QRouter::push(const QByteArray& pageClassName, const QVariant& data) {
                 }
             }
         }
-        widget = reflectByName(pageClassName, item.container, data);
+        try {
+            widget = reflectByName(pageClassName, item.container, data);
+        } catch (QRouterRuntimeException& e) {
+            qFatal(e.message.toLatin1().data());
+        }
     }
     item.stack.append(widget);
 
@@ -259,21 +270,39 @@ void QRouter::popUntil(int stackSize) {
 }
 
 
-QVariant QRouter::sendEventCur(const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
-    if (item.stack.isEmpty()) {
-        return {};
+QVariant QRouter::sendEventCur(const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
+        if (item.stack.isEmpty()) {
+            return {};
+        }
+        return item.stack.last()->onRouterEvent(event, data);
+    } catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
+        }
     }
-
-    return item.stack.last()->onRouterEvent(event, data);
+    return {};
 }
 
-QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
+QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
 
-    for (const auto& page: item.stack) {
-        if (page->metaObject()->className() == pageClassName) {
-            return page->onRouterEvent(event, data);
+        for (const auto &page: item.stack) {
+            if (page->metaObject()->className() == pageClassName) {
+                return page->onRouterEvent(event, data);
+            }
+        }
+    } catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
         }
     }
 
@@ -284,11 +313,20 @@ QVariant QRouter::sendEventTo(const QByteArray& pageClassName, const QString& ev
     return {};
 }
 
-void QRouter::sendEventAll(const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
+void QRouter::sendEventAll(const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
 
-    for (const auto& widget: item.stack) {
-        widget->onRouterEvent(event, data);
+        for (const auto &widget: item.stack) {
+            widget->onRouterEvent(event, data);
+        }
+    }  catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
+        }
     }
 
     for (auto i = keepSingletonPageInstance.begin(); i != keepSingletonPageInstance.end(); ++i) {
@@ -296,22 +334,39 @@ void QRouter::sendEventAll(const QString& event, const QVariant& data) {
     }
 }
 
-void QRouter::postEventCur(const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
-    if (item.stack.isEmpty()) {
-        return;
+void QRouter::postEventCur(const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
+        if (item.stack.isEmpty()) {
+            return;
+        }
+        return qApp->postEvent(item.stack.last(), new QRouterPageEvent(event, data));
+    }  catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
+        }
     }
-
-    return qApp->postEvent(item.stack.last(), new QRouterPageEvent(event, data));
 }
 
-void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
+void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
 
-    for (const auto& page : item.stack) {
-        if (page->metaObject()->className() == pageClassName) {
-            qApp->postEvent(page, new QRouterPageEvent(event, data));
-            return;
+        for (const auto &page: item.stack) {
+            if (page->metaObject()->className() == pageClassName) {
+                qApp->postEvent(page, new QRouterPageEvent(event, data));
+                return;
+            }
+        }
+    }  catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
         }
     }
 
@@ -320,17 +375,34 @@ void QRouter::postEventTo(const QByteArray& pageClassName, const QString& event,
     }
 }
 
-void QRouter::postEventToRoot(const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
-
-    qApp->postEvent(item.container->parent(), new QRouterPageEvent(event, data));
+void QRouter::postEventToRoot(const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
+        qApp->postEvent(item.container->parent(), new QRouterPageEvent(event, data));
+    } catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
+        }
+    }
 }
 
-void QRouter::postEventAll(const QString& event, const QVariant& data) {
-    auto& item = currentContainer();
+void QRouter::postEventAll(const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
+    try {
+        auto &item = currentContainer();
 
-    for (const auto& widget : item.stack) {
-        qApp->postEvent(widget, new QRouterPageEvent(event, data));
+        for (const auto &widget: item.stack) {
+            qApp->postEvent(widget, new QRouterPageEvent(event, data));
+        }
+    } catch (QRouterRuntimeException& e) {
+        if (!ignoreContainerNotInstalled) {
+#ifdef QT_DEBUG
+            qFatal(e.message.toLatin1().data());
+#endif
+            throw e;
+        }
     }
 
     for (auto i = keepSingletonPageInstance.begin(); i != keepSingletonPageInstance.end(); ++i) {
@@ -345,18 +417,25 @@ AbstractRouterWidget* QRouter::reflectByName(const QByteArray& className, QWidge
     int type = QMetaType::type(className + '*');
     const auto metaObj = QMetaType::metaObjectForType(type);
 #endif
-    Q_ASSERT_X(metaObj != nullptr, "qrouter reflect page class", "cannot reflect by name!");
+    if (metaObj == nullptr) {
+        throw QRouterRuntimeException(QString("cannot find page:'%1', the page class may not register by call 'qRegisterMetaType<%1*>()'.").arg(QString(className)));
+    }
 
     auto obj = metaObj->newInstance(Q_ARG(QVariant, data), Q_ARG(QWidget*, parent));
     auto widget = dynamic_cast<AbstractRouterWidget*>(obj);
-    Q_ASSERT_X(widget != nullptr, "qrouter reflect page class", "cannot reflect by name!");
+    if (widget == nullptr) {
+        throw QRouterRuntimeException(QString("cannot create instance of page:'%1', the page class constructor may not be assigned of 'Q_INVOKABLE'.").arg(QString(className)));
+    }
 
     return widget;
 }
 
 QRouter::RouterContainerItem& QRouter::currentContainer() {
     int id = m_curContextId.value(QThread::currentThread());
-    Q_ASSERT_X(containers.contains(id), "get current containter", "cannot find context id!");
+
+    if (!containers.contains(id)) {
+        throw QRouterRuntimeException(QString("cannot find container with context id:%1, the container may not be installed.").arg(id));
+    }
 
     return containers[id];
 }

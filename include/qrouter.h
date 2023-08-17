@@ -6,6 +6,7 @@
 #include <qeasingcurve.h>
 #include <qthread.h>
 #include <qhash.h>
+#include <qexception.h>
 
 class QRouterPageEvent : public QEvent {
 public:
@@ -19,6 +20,18 @@ public:
 
     QString event;
     QVariant data;
+};
+
+class QRouterRuntimeException : public QException {
+public:
+    explicit QRouterRuntimeException(QString message)
+        : message(std::move(message))
+    {}
+
+    void raise() const override { throw *this; }
+    [[nodiscard]] QRouterRuntimeException* clone() const override { return new QRouterRuntimeException(*this); }
+
+    QString message;
 };
 
 class AbstractRouterWidget;
@@ -175,54 +188,61 @@ public:
      * Send a event to current page of the top of page stack
      * @param event event name
      * @param data data for current page, receive data by 'runRouterEvent' (no data to feedback) or 'executeRouterEvent'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      * @return processed data of current page
      */
-    QVariant sendEventCur(const QString& event, const QVariant& data = QVariant());
+    QVariant sendEventCur(const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /**
      * Send a event to the specified page
      * @param pageClassName the specified page name
      * @param event event name
      * @param data data for current the specified page, receive data by 'runRouterEvent' (no data to feedback) or 'executeRouterEvent'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      * @return processed data of the specified page
      */
-    QVariant sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant());
+    QVariant sendEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /**
      * Send a event to all page of the current page stack
      * @param event event name
      * @param data data for all page, receive data by 'runRouterEvent'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      */
-    void sendEventAll(const QString& event, const QVariant& data = QVariant());
+    void sendEventAll(const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /**
      * Post a event to current page of the top of page stack
      * @param event event name
      * @param data data for current page, receive data by 'runRouterEvent'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      */
-    void postEventCur(const QString& event, const QVariant& data = QVariant());
+    void postEventCur(const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /**
      * Post a event to the specified page
      * @param pageClassName the specified page name
      * @param event event name
      * @param data data for current the specified page, receive data by 'runRouterEvent'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      */
-    void postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant());
+    void postEventTo(const QByteArray& pageClassName, const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /**
      * Post a event to the container parent widget (stackWidget->parent())
      * @param event event name
      * @param data data for container parent, receive data by override 'bool event(QEvent* event)'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      */
-    void postEventToRoot(const QString& event, const QVariant& data = QVariant());
+    void postEventToRoot(const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /**
      * Post a event to all page of the current page stack
      * @param event event name
      * @param data data for all page, receive data by 'runRouterEvent'
+     * @param ignoreContainerNotInstalled ignore send event when the current context id of container is not installed
      */
-    void postEventAll(const QString& event, const QVariant& data = QVariant());
+    void postEventAll(const QString& event, const QVariant& data = QVariant(), bool ignoreContainerNotInstalled = true);
 
     /////////////////////////////// transition animation operation ///////////////////////////////
 
