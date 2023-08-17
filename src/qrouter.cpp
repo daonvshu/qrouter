@@ -196,6 +196,7 @@ bool QRouter::move2Top(const QByteArray& pageClassName) {
     if (widgetTag == nullptr) {
         if (keepSingletonPageInstance.contains(pageClassName)) {
             widgetTag = keepSingletonPageInstance.take(pageClassName);
+            item.container->addWidget(widgetTag);
         } else {
             return false;
         }
