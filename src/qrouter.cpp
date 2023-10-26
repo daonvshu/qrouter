@@ -41,6 +41,11 @@ AbstractRouterWidget* QRouter::current() {
     return item.stack.last();
 }
 
+QList<AbstractRouterWidget *> QRouter::currentInstances() {
+    auto& item = currentContainer();
+    return item.stack;
+}
+
 QString QRouter::currentName() {
     auto item = current();
     if (item == nullptr) {
@@ -67,6 +72,14 @@ AbstractRouterWidget *QRouter::getInstanceFromStack(const QByteArray &pageClassN
     }
 
     return widgetTag;
+}
+
+AbstractRouterWidget *QRouter::getInstanceFromStack(int stackIndex) {
+    auto& item = currentContainer();
+    if (stackIndex < 0 || stackIndex >= item.stack.size()) {
+        return nullptr;
+    }
+    return item.stack[stackIndex];
 }
 
 int QRouter::getIdByContainer(QStackedWidget *container) {

@@ -82,11 +82,24 @@ public:
     }
 
     /**
+     * Get all page instance from current page stack
+     * @return
+     */
+    QList<AbstractRouterWidget*> currentInstances();
+
+    /**
      * Get instance by name in current page stack, return null if not exist
      * @param pageClassName
      * @return
      */
     AbstractRouterWidget* getInstanceFromStack(const QByteArray& pageClassName);
+
+    /**
+     * Get instance by stack index in current page stack, return null if out of range
+     * @param stackIndex
+     * @return
+     */
+    AbstractRouterWidget* getInstanceFromStack(int stackIndex);
 
     /**
      * Get instance by name in current page stack, return null if not exist
