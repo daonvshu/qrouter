@@ -189,7 +189,7 @@ void QRouter::close(const QByteArray &pageClassName) {
         }
     }
 
-    if (isLast) {
+    if (isLast && !item.stack.isEmpty()) {
         item.container->setCurrentWidget(item.stack.last());
     }
 }
