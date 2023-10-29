@@ -10,6 +10,7 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 add_library(${PROJECT_NAME} 
     abstractrouterwidget.cpp
     qrouter.cpp
+    routerstackmanager.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)
