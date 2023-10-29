@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1030</width>
-    <height>682</height>
+    <width>1064</width>
+    <height>958</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>QRouter</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0,1,0">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -60,10 +60,34 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>stack widget:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="styleSheet">
       <string notr="true">QStackedWidget{border:1px solid red;}</string>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>widget:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <property name="styleSheet">
+      <string notr="true">#widget{
+border:1px solid red;
+}</string>
+     </property>
+     <layout class="QVBoxLayout" name="container_layout"/>
     </widget>
    </item>
    <item>

@@ -11,6 +11,9 @@ add_library(${PROJECT_NAME}
     abstractrouterwidget.cpp
     qrouter.cpp
     routerstackmanager.cpp
+
+    container/layoutroutercontainer.cpp
+    container/stackroutercontainer.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)

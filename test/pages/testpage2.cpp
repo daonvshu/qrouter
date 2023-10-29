@@ -14,6 +14,7 @@ TestPage2::TestPage2(const QVariant& data, QWidget* parent)
     ui.setupUi(this);
 
     auto value = data.value<CustomData>();
+    pageStackId = value.pageStackId;
 
     ui.data_from_last_page->setText(
         QString("from %1 to %2, msg: <%3>")
@@ -42,7 +43,7 @@ QVariant TestPage2::readAttemptCloseData() {
 
 void TestPage2::runRouterEvent(const QString& event, const QVariant& data) {
     if (event == "eventtest") {
-        QRouter::of().postEventToRoot("printevent", "test page2 receive event!");
+        QRouter::of(pageStackId).postEventToRoot("printevent", "test page2 receive event!");
     }
 }
 
@@ -50,8 +51,8 @@ void TestPage2::popWithData() {
     if (ui.pop_data_extra->isChecked()) {
         auto d = readAttemptCloseData().value<CustomData>();
         d.message += " with extra";
-        QRouter::of().pop(QVariant::fromValue(d));
+        QRouter::of(pageStackId).pop(QVariant::fromValue(d));
     } else {
-        QRouter::of().pop();
+        QRouter::of(pageStackId).pop();
     }
 }

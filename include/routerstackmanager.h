@@ -2,7 +2,8 @@
 
 #include <qobject.h>
 #include <qvariant.h>
-#include <qstackedwidget.h>
+
+#include "abstractroutercontainer.h"
 
 class AbstractRouterWidget;
 class RouterStackManager {
@@ -192,7 +193,7 @@ public:
     //RouterStackManager& rotate(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
 
 private:
-    QStackedWidget* container;
+    AbstractRouterContainer* container = nullptr;
     QList<AbstractRouterWidget*> stack;
 
     QHash<QString, AbstractRouterWidget*> keepSingletonPageInstance;

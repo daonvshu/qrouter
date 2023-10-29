@@ -7,15 +7,34 @@
 #include "qrouterpageevent.h"
 #include "routerstackmanager.h"
 
+#include "container/stackroutercontainer.h"
+#include "container/layoutroutercontainer.h"
+
 class QRouter {
 public:
     /**
-     * Use the specified 'stackedWidget' as the page stack container
+    * install a page stack container for 'contextId'
+    * @param container page stack container
+    * @param contextId page stack id
+    * @return
+    */
+    static QRouter& install(AbstractRouterContainer* container, int contextId = 0);
+
+    /**
+     * Use the specified 'stackedWidget' to manage page stack
      * @param stackContainer page stack container
      * @param contextId page stack id
      * @return
      */
     static QRouter& install(QStackedWidget* stackContainer, int contextId = 0);
+
+    /**
+     * Use the specified 'layout'  to manage page stack
+     * @param boxLayout page stack container
+     * @param contextId page stack id
+     * @return
+     */
+    static QRouter& install(QBoxLayout* boxLayout, int contextId = 0);
 
     /**
      * Get page stack manager by id
@@ -48,10 +67,10 @@ public:
 
     /**
      * Get page stack id of the specified container
-     * @param container
+     * @param container container instance
      * @return -1 if not register by 'install'
      */
-    static int getIdByContainer(QStackedWidget* container);
+    static int getIdByContainer(QWidget* container);
 
 private:
     QRouter();

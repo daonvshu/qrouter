@@ -13,11 +13,14 @@ TestPage1::TestPage1(const QVariant& data, QWidget* parent)
 {
     ui.setupUi(this);
 
+    pageStackId = data.toInt();
+
     connect(ui.btn_push, &QPushButton::clicked, [&] {
         CustomData data;
         data.sendTime = QDateTime::currentMSecsSinceEpoch();
         data.message = "send data from page1 to page2";
-        QRouter::of().push("TestPage2", QVariant::fromValue(data));
+        data.pageStackId = pageStackId;
+        QRouter::of(pageStackId).push("TestPage2", QVariant::fromValue(data));
     });
 }
 
@@ -35,6 +38,6 @@ void TestPage1::onNavigateResult(const QVariant& data) {
 
 void TestPage1::runRouterEvent(const QString& event, const QVariant& data) {
     if (event == "eventtest") {
-        QRouter::of().postEventToRoot("printevent", "test page1 receive event!");
+        QRouter::of(pageStackId).postEventToRoot("printevent", "test page1 receive event!");
     }
 }

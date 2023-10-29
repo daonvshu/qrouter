@@ -5,11 +5,19 @@ QRouter QRouter::router;
 QRouter::QRouter()
 {}
 
-QRouter& QRouter::install(QStackedWidget* stackContainer, int contextId) {
+QRouter &QRouter::install(AbstractRouterContainer *container, int contextId) {
     RouterStackManager manager;
-    manager.container = stackContainer;
+    manager.container = container;
     router.managers.insert(contextId, manager);
     return router;
+}
+
+QRouter& QRouter::install(QStackedWidget* stackContainer, int contextId) {
+    return install(new StackRouterContainer(stackContainer), contextId);
+}
+
+QRouter &QRouter::install(QBoxLayout *boxLayout, int contextId) {
+    return install(new LayoutRouterContainer(boxLayout), contextId);
 }
 
 RouterStackManager& QRouter::of(int contextId) {
@@ -19,9 +27,9 @@ RouterStackManager& QRouter::of(int contextId) {
     return router.managers[contextId];
 }
 
-int QRouter::getIdByContainer(QStackedWidget *container) {
+int QRouter::getIdByContainer(QWidget *container) {
     for (auto i = router.managers.begin(); i != router.managers.end(); ++i) {
-        if (i.value().container == container) {
+        if (i.value().container->parent() == container) {
             return i.key();
         }
     }

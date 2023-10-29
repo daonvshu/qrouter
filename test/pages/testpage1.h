@@ -15,6 +15,8 @@ public:
 private:
     Ui::TestPage1 ui;
 
+    int pageStackId;
+
     static int typeId;
 
 protected:

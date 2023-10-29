@@ -68,9 +68,7 @@ void RouterStackManager::initStack(const QList<QByteArray>& pages) {
     }
     for (const auto& page: pages) {
         try {
-            auto widget = reflectByName(page, container, {});
-            stack.append(widget);
-            container->addWidget(widget);
+            stack.append(reflectByName(page, container->childPageParent(), {}));
         } catch (QRouterRuntimeException& e) {
             qFatal(e.message.toLatin1().data());
         }
@@ -92,14 +90,12 @@ void RouterStackManager::push(const QByteArray& pageClassName, const QVariant& d
             }
         }
         try {
-            widget = reflectByName(pageClassName, container, data);
+            widget = reflectByName(pageClassName, container->childPageParent(), data);
         } catch (QRouterRuntimeException& e) {
             qFatal(e.message.toLatin1().data());
         }
     }
     stack.append(widget);
-
-    container->addWidget(widget);
     container->setCurrentWidget(widget);
 }
 
@@ -174,7 +170,6 @@ bool RouterStackManager::move2Top(const QByteArray& pageClassName) {
     if (widgetTag == nullptr) {
         if (keepSingletonPageInstance.contains(pageClassName)) {
             widgetTag = keepSingletonPageInstance.take(pageClassName);
-            container->addWidget(widgetTag);
         } else {
             return false;
         }
@@ -330,7 +325,7 @@ void RouterStackManager::postEventTo(const QByteArray& pageClassName, const QStr
 
 void RouterStackManager::postEventToRoot(const QString& event, const QVariant& data, bool ignoreContainerNotInstalled) {
     try {
-        qApp->postEvent(container->parent(), new QRouterPageEvent(event, data));
+        qApp->postEvent(container->rootPageEventReceiver(), new QRouterPageEvent(event, data));
     } catch (QRouterRuntimeException& e) {
         if (!ignoreContainerNotInstalled) {
 #ifdef QT_DEBUG
