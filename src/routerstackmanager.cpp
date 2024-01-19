@@ -69,11 +69,11 @@ void RouterStackManager::initStack(const QList<QByteArray>& pages) {
     for (const auto& page: pages) {
         try {
             stack.append(reflectByName(page, container->childPageParent(), {}));
+            container->setCurrentWidget(stack.last());
         } catch (QRouterRuntimeException& e) {
             qFatal(e.message.toLatin1().data());
         }
     }
-    container->setCurrentWidget(stack.last());
 }
 
 void RouterStackManager::push(const QByteArray& pageClassName, const QVariant& data) {
