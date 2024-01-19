@@ -26,7 +26,11 @@ void LayoutRouterContainer::removeWidget(AbstractRouterWidget *widget) {
     if (pageInstances.contains(widget)) {
         pageInstances.removeOne(widget);
     }
-    removeAllWidget();
+    if (auto item = container->itemAt(0)) {
+        if (item->widget() == widget) {
+            removeAllWidget();
+        }
+    }
 }
 
 void LayoutRouterContainer::removeAllWidget() {
