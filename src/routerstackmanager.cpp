@@ -436,7 +436,11 @@ QPixmap RouterStackManager::captureCurrentPage() const {
         stack.isEmpty() || !stack.last()->isVisible()) {
         return {};
     }
-    return stack.last()->grab();
+    auto* page = stack.last();
+    auto* window = page->window();
+    const QRect pageRect(page->mapTo(window, QPoint()), page->size());
+    // Capture the composed background from ancestors of transparent pages.
+    return window->grab(pageRect);
 }
 
 void RouterStackManager::transitionTo(AbstractRouterWidget* widget, const QPixmap& outgoingSnapshot) {

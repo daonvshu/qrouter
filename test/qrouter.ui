@@ -72,21 +72,24 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>stack widget:</string>
+      <string>stack widget: transparent pages on a white parent background — push/pop should not flash gray</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="styleSheet">
-      <string notr="true">QStackedWidget{border:1px solid red;}</string>
+      <string notr="true">#stackedWidget{
+border:1px solid red;
+background-color:white;
+}</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>widget:</string>
+      <string>layout widget: transparent pages on a parent gradient — push/pop should preserve the gradient</string>
      </property>
     </widget>
    </item>
@@ -95,6 +98,7 @@
      <property name="styleSheet">
       <string notr="true">#widget{
 border:1px solid red;
+background:qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFFFFF, stop:1 #B3D9FF);
 }</string>
      </property>
      <layout class="QVBoxLayout" name="container_layout"/>
