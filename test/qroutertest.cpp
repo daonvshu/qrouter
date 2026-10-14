@@ -18,6 +18,19 @@ QRouterTest::QRouterTest(QWidget *parent)
     QRouter::install(ui.stackedWidget, 0);
     QRouter::install(ui.container_layout, 1);
 
+    auto updateAnimation = [&](bool enabled) {
+        if (enabled) {
+            QRouter::of(0).enableAnimation();
+            QRouter::of(1).enableAnimation();
+        } else {
+            QRouter::of(0).noAnimation();
+            QRouter::of(1).noAnimation();
+        }
+    };
+    updateAnimation(ui.enable_animation->isChecked());
+    connect(ui.enable_animation, &QCheckBox::toggled,
+            this, updateAnimation);
+
     connect(ui.stackedWidget, &QStackedWidget::currentChanged, this, &QRouterTest::printPageStack);
 
     QRouter::of(0).push("TestPage1", 0);

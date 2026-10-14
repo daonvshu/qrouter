@@ -148,7 +148,30 @@ QRouter::getInstance<MyPage>("MyPage");
 QRouter::getIdByContainer(ui.page_container);
 ```
 
-### 4. 发送事件
+### 4. 自定义切换动画
+
+默认动画是页面透明度与垂直位移组合：新页面从下方小距离滑入并淡入，旧页面截图向下滑出并淡出。可以通过实现 `RouterAnimation` 替换进入和退出动画：
+
+```cpp
+class MyRouterAnimation : public RouterAnimation {
+public:
+    QAbstractAnimation* animateEnter(QWidget* widget) override {
+        // create and return your enter animation...
+        return nullptr;
+    }
+
+    QAbstractAnimation* animateExit(QWidget* widget) override {
+        // create and return your exit animation on the prepared widget...
+        return nullptr;
+    }
+};
+
+QRouter::of().setAnimation(QSharedPointer<MyRouterAnimation>::create());
+```
+
+`setAnimation(nullptr)` 或 `resetAnimation()` 会恢复默认的透明加位移动画。默认实现使用 10px 位移、300ms 时长和 `OutCubic` 曲线，并由默认动画自行创建透明度 effect；自定义实现自行决定是否创建 effect、位移、时长、曲线及其他动画参数。退出动画传入的 `widget` 已由容器准备好并显示截图，自定义实现只需要在它上面创建并返回未启动的动画对象，动画的启动、完成处理和资源释放由框架统一负责。
+
+### 5. 发送事件
 ```cpp
 //同步发送事件到当前页面（页面栈顶）
 QRouter::of().sendEventCur("eventName");

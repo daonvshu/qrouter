@@ -13,6 +13,8 @@ set(CMAKE_DEBUG_POSTFIX "d")
 add_library(${PROJECT_NAME} 
     abstractrouterwidget.cpp
     qrouter.cpp
+    routeranimation.cpp
+    routeranimwidget.cpp
     routerstackmanager.cpp
 
     container/layoutroutercontainer.cpp

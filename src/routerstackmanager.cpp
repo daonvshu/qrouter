@@ -8,6 +8,10 @@
 
 QEvent::Type QRouterPageEvent::type = static_cast<QEvent::Type>(QEvent::registerEventType());
 
+RouterStackManager::RouterStackManager()
+    : animation(new FadeSlideRouterAnimation())
+{}
+
 QStringList RouterStackManager::readStack() {
     QStringList stackNames;
 
@@ -77,6 +81,17 @@ void RouterStackManager::initStack(const QList<QByteArray>& pages) {
 }
 
 void RouterStackManager::push(const QByteArray& pageClassName, const QVariant& data) {
+    for (auto page : stack) {
+        if (page->metaObject()->className() == pageClassName && page->singletonInstance()) {
+            pushInternal(pageClassName, data, {}, false);
+            return;
+        }
+    }
+    const bool hasOutgoingSnapshot = !stack.isEmpty();
+    pushInternal(pageClassName, data, hasOutgoingSnapshot ? captureCurrentPage() : QPixmap(), hasOutgoingSnapshot);
+}
+
+void RouterStackManager::pushInternal(const QByteArray& pageClassName, const QVariant& data, const QPixmap& outgoingSnapshot, bool hasOutgoingSnapshot) {
     AbstractRouterWidget* widget;
     if (keepSingletonPageInstance.contains(pageClassName)) {
         widget = keepSingletonPageInstance.take(pageClassName);
@@ -84,7 +99,7 @@ void RouterStackManager::push(const QByteArray& pageClassName, const QVariant& d
         for (auto p : stack) {
             if (p->metaObject()->className() == pageClassName) {
                 if (p->singletonInstance()) {
-                    move2Top(pageClassName);
+                    move2TopInternal(pageClassName, outgoingSnapshot, hasOutgoingSnapshot);
                     return;
                 }
             }
@@ -96,17 +111,19 @@ void RouterStackManager::push(const QByteArray& pageClassName, const QVariant& d
         }
     }
     stack.append(widget);
-    container->setCurrentWidget(widget);
+    transitionTo(widget, hasOutgoingSnapshot ? outgoingSnapshot : QPixmap());
 }
 
 void RouterStackManager::pushReplace(const QByteArray& pageClassName, const QVariant& data) {
+    const bool hasOutgoingSnapshot = !stack.isEmpty();
+    auto outgoingSnapshot = hasOutgoingSnapshot ? captureCurrentPage() : QPixmap();
     if (!stack.isEmpty()) {
         auto widget = stack.takeLast();
         container->removeWidget(widget);
         removePageInstance(widget);
     }
 
-    push(pageClassName, data);
+    pushInternal(pageClassName, data, outgoingSnapshot, hasOutgoingSnapshot);
 }
 
 bool RouterStackManager::pushOrMove2Top(const QByteArray &pageClassName, const QVariant &data) {
@@ -118,8 +135,12 @@ bool RouterStackManager::pushOrMove2Top(const QByteArray &pageClassName, const Q
 }
 
 void RouterStackManager::popAndPush(const QByteArray &pageClassName, const QVariant& data) {
+    QPixmap outgoingSnapshot;
+    bool hasOutgoingSnapshot = false;
     if (!stack.isEmpty()) {
         if (stack.last()->attemptClose()) {
+            outgoingSnapshot = captureCurrentPage();
+            hasOutgoingSnapshot = true;
             auto widget = stack.takeLast();
             container->removeWidget(widget);
             removePageInstance(widget);
@@ -128,40 +149,56 @@ void RouterStackManager::popAndPush(const QByteArray &pageClassName, const QVari
         }
     }
 
-    push(pageClassName, data);
+    pushInternal(pageClassName, data, outgoingSnapshot, hasOutgoingSnapshot);
 }
 
 void RouterStackManager::close(const QByteArray &pageClassName) {
-    bool isLast = false;
+    int pageIndex = -1;
     for (int i=0; i<stack.size(); i++) {
         if (stack.at(i)->metaObject()->className() == pageClassName) {
-            isLast = i == stack.size() - 1;
-            auto widget = stack.takeAt(i);
-            container->removeWidget(widget);
-            removePageInstance(widget);
+            pageIndex = i;
             break;
         }
     }
 
-    if (isLast && !stack.isEmpty()) {
-        container->setCurrentWidget(stack.last());
+    if (pageIndex < 0) {
+        return;
+    }
+
+    const bool hasOutgoingSnapshot = pageIndex == stack.size() - 1 && stack.size() > 1;
+    auto outgoingSnapshot = hasOutgoingSnapshot ? captureCurrentPage() : QPixmap();
+    auto widget = stack.takeAt(pageIndex);
+    container->removeWidget(widget);
+    removePageInstance(widget);
+
+    if (hasOutgoingSnapshot) {
+        transitionTo(stack.last(), outgoingSnapshot);
     }
 }
 
 void RouterStackManager::pushAndClear(const QByteArray& pageClassName, const QVariant& data) {
+    const bool hasOutgoingSnapshot = !stack.isEmpty();
+    auto outgoingSnapshot = hasOutgoingSnapshot ? captureCurrentPage() : QPixmap();
     while (!stack.isEmpty()) {
         auto widget = stack.takeLast();
         container->removeWidget(widget);
         removePageInstance(widget);
     }
 
-    push(pageClassName, data);
+    pushInternal(pageClassName, data, outgoingSnapshot, hasOutgoingSnapshot);
 }
 
 bool RouterStackManager::move2Top(const QByteArray& pageClassName) {
+    return move2TopInternal(pageClassName, {}, false);
+}
+
+bool RouterStackManager::move2TopInternal(const QByteArray& pageClassName, const QPixmap& outgoingSnapshot, bool hasOutgoingSnapshot) {
     AbstractRouterWidget* widgetTag = nullptr;
     for (int i=0; i<stack.size(); i++) {
         if (stack.at(i)->metaObject()->className() == pageClassName) {
+            if (i == stack.size() - 1) {
+                return true;
+            }
             widgetTag = stack.takeAt(i);
             break;
         }
@@ -175,8 +212,9 @@ bool RouterStackManager::move2Top(const QByteArray& pageClassName) {
         }
     }
 
+    auto snapshot = hasOutgoingSnapshot ? outgoingSnapshot : captureCurrentPage();
     stack.append(widgetTag);
-    container->setCurrentWidget(widgetTag);
+    transitionTo(widgetTag, snapshot);
 
     return true;
 }
@@ -184,6 +222,7 @@ bool RouterStackManager::move2Top(const QByteArray& pageClassName) {
 void RouterStackManager::pop(QVariant data) {
     if (!stack.isEmpty()) {
         if (stack.last()->attemptClose()) {
+            auto outgoingSnapshot = stack.size() > 1 ? captureCurrentPage() : QPixmap();
             auto widget = stack.takeLast();
             if (data.isNull()) {
                 data = widget->readAttemptCloseData();
@@ -191,37 +230,54 @@ void RouterStackManager::pop(QVariant data) {
             container->removeWidget(widget);
             removePageInstance(widget);
 
-            container->setCurrentWidget(stack.last());
-            stack.last()->onNavigateResult(data);
+            if (!stack.isEmpty()) {
+                transitionTo(stack.last(), outgoingSnapshot);
+                stack.last()->onNavigateResult(data);
+            }
         }
     }
 }
 
 void RouterStackManager::popUntil(const QByteArray& untilName) {
+    QPixmap outgoingSnapshot;
+    bool hasOutgoingSnapshot = false;
+    bool hasDestination = false;
+    for (const auto& page : stack) {
+        if (page->metaObject()->className() == untilName) {
+            hasDestination = true;
+            break;
+        }
+    }
     while (!stack.isEmpty() && stack.last()->metaObject()->className() != untilName) {
         if (!stack.last()->attemptClose()) {
-            container->setCurrentWidget(stack.last());
+            transitionTo(stack.last(), hasOutgoingSnapshot ? outgoingSnapshot : QPixmap());
             return;
+        }
+        if (hasDestination && !hasOutgoingSnapshot) {
+            outgoingSnapshot = captureCurrentPage();
+            hasOutgoingSnapshot = true;
         }
         auto widget = stack.takeLast();
         container->removeWidget(widget);
         removePageInstance(widget);
     }
 
-    if (!stack.isEmpty()) {
-        container->setCurrentWidget(stack.last());
+    if (hasOutgoingSnapshot && !stack.isEmpty()) {
+        transitionTo(stack.last(), outgoingSnapshot);
     }
 }
 
 void RouterStackManager::popUntil(int stackSize) {
+    const bool hasOutgoingSnapshot = stackSize > 0 && stack.size() > stackSize;
+    auto outgoingSnapshot = hasOutgoingSnapshot ? captureCurrentPage() : QPixmap();
     while (stack.size() > stackSize) {
         auto widget = stack.takeLast();
         container->removeWidget(widget);
         removePageInstance(widget);
     }
 
-    if (!stack.isEmpty()) {
-        container->setCurrentWidget(stack.last());
+    if (hasOutgoingSnapshot && !stack.isEmpty()) {
+        transitionTo(stack.last(), outgoingSnapshot);
     }
 }
 
@@ -353,6 +409,38 @@ void RouterStackManager::postEventAll(const QString& event, const QVariant& data
     for (auto i = keepSingletonPageInstance.begin(); i != keepSingletonPageInstance.end(); ++i) {
         qApp->postEvent(i.value(), new QRouterPageEvent(event, data));
     }
+}
+
+RouterStackManager& RouterStackManager::enableAnimation() {
+    transition.enabled = true;
+    return *this;
+}
+
+RouterStackManager& RouterStackManager::noAnimation() {
+    transition.enabled = false;
+    return *this;
+}
+
+RouterStackManager& RouterStackManager::setAnimation(const QSharedPointer<RouterAnimation>& value) {
+    animation = value.isNull() ? QSharedPointer<RouterAnimation>(new FadeSlideRouterAnimation()) : value;
+    return *this;
+}
+
+RouterStackManager& RouterStackManager::resetAnimation() {
+    animation = QSharedPointer<RouterAnimation>(new FadeSlideRouterAnimation());
+    return *this;
+}
+
+QPixmap RouterStackManager::captureCurrentPage() const {
+    if (!transition.enabled ||
+        stack.isEmpty() || !stack.last()->isVisible()) {
+        return {};
+    }
+    return stack.last()->grab();
+}
+
+void RouterStackManager::transitionTo(AbstractRouterWidget* widget, const QPixmap& outgoingSnapshot) {
+    container->transitionTo(widget, transition, outgoingSnapshot, animation);
 }
 
 AbstractRouterWidget* RouterStackManager::reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data) {

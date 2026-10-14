@@ -1,13 +1,17 @@
 #pragma once
 
 #include <qobject.h>
+#include <qsharedpointer.h>
 #include <qvariant.h>
 
 #include "abstractroutercontainer.h"
+#include "routeranimation.h"
 
 class AbstractRouterWidget;
 class RouterStackManager {
 public:
+    RouterStackManager();
+
     /////////////////////////////// base information ///////////////////////////////
     /**
      * Get all current page stack names
@@ -187,10 +191,30 @@ public:
 
     /////////////////////////////// transition animation operation ///////////////////////////////
 
-    //RouterStackManager& alpha(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
-    //RouterStackManager& translate(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
-    //RouterStackManager& scale(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
-    //RouterStackManager& rotate(int duration = 300, const QEasingCurve& easingCurve = QEasingCurve::OutCubic);
+    /**
+     * Enable transition animations for this page stack.
+     * @return this manager
+     */
+    RouterStackManager& enableAnimation();
+
+    /**
+     * Disable transition animations for this page stack.
+     * @return this manager
+     */
+    RouterStackManager& noAnimation();
+
+    /**
+     * Replace the animation implementation used by this page stack.
+     * The implementation returns unstarted animations; the framework starts
+     * them and handles completion and cleanup.
+     * @param animation custom animation implementation, nullptr restores the default
+     */
+    RouterStackManager& setAnimation(const QSharedPointer<RouterAnimation>& animation);
+
+    /**
+     * Restore the default fade-and-slide animation implementation.
+     */
+    RouterStackManager& resetAnimation();
 
 private:
     AbstractRouterContainer* container = nullptr;
@@ -203,5 +227,12 @@ private:
 private:
     static AbstractRouterWidget* reflectByName(const QByteArray& className, QWidget* parent, const QVariant& data);
 
+    void pushInternal(const QByteArray& pageClassName, const QVariant& data, const QPixmap& outgoingSnapshot, bool hasOutgoingSnapshot);
+    bool move2TopInternal(const QByteArray& pageClassName, const QPixmap& outgoingSnapshot, bool hasOutgoingSnapshot);
+    QPixmap captureCurrentPage() const;
+    void transitionTo(AbstractRouterWidget* widget, const QPixmap& outgoingSnapshot = QPixmap());
     void removePageInstance(AbstractRouterWidget* widget);
+
+    RouterTransition transition;
+    QSharedPointer<RouterAnimation> animation;
 };
