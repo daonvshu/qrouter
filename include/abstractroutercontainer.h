@@ -35,7 +35,7 @@ public:
     virtual void setCurrentWidget(AbstractRouterWidget* widget) = 0;
 
     /**
-     * 截图前结束当前过渡，恢复页面的稳定显示状态。
+     * Finish the current transition before capturing the settled page.
      */
     virtual void prepareForSnapshot() {}
 

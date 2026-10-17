@@ -35,7 +35,7 @@ QPixmap RouterAnimWidget::capture(QWidget* widget, QPointF* drawOffset) {
     const qreal dpr = widget->devicePixelRatioF();
     const QPoint origin = widget->mapTo(widget->window(), QPoint());
     const QPointF deviceOrigin(origin.x() * dpr, origin.y() * dpr);
-    // 保留窗口坐标对应的物理像素相位，保证快照与页面文字的栅格位置一致。
+    // Preserve window-relative pixel alignment so snapshot text stays on the same raster grid.
     const QPointF shift = (deviceOrigin - QPointF(qFloor(deviceOrigin.x()), qFloor(deviceOrigin.y()))) / dpr;
     QPixmap snapshot(QSize(qCeil((widget->width() + shift.x()) * dpr),
                            qCeil((widget->height() + shift.y()) * dpr)));

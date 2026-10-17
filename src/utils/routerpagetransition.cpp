@@ -26,7 +26,7 @@ RouterPageTransition::~RouterPageTransition() {
 RouterPageTransition* RouterPageTransition::start(QWidget* widget, const QPixmap& outgoingSnapshot,
                                                 const QPointF& outgoingOffset,
                                                 const QSharedPointer<RouterAnimation>& animation) {
-    // 页面已有的绘制效果由页面自身管理。
+    // Leave existing page effects under the page's control.
     if (!widget->isVisible() || !widget->updatesEnabled() || widget->graphicsEffect() ||
         !widget->parentWidget() || outgoingSnapshot.isNull() || animation.isNull()) {
         return nullptr;
@@ -61,7 +61,8 @@ RouterPageTransition* RouterPageTransition::start(QWidget* widget, const QPixmap
         return nullptr;
     }
 
-    // 暂停真实页面的绘制，防止半透明内容与快照重复叠加；页面仍参与布局和生命周期。
+    // Suppress live page painting to avoid compositing translucent content twice.
+    // Keep the page visible so layout and lifecycle events continue normally.
     auto* effect = new QGraphicsOpacityEffect(widget);
     effect->setOpacity(0.0);
     widget->setGraphicsEffect(effect);
