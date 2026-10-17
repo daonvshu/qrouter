@@ -150,7 +150,31 @@ QRouter::getIdByContainer(ui.page_container);
 
 ### 4. 自定义切换动画
 
-默认动画是页面透明度与垂直位移组合：新页面从下方小距离滑入并淡入，旧页面截图向下滑出并淡出。可以通过实现 `RouterAnimation` 替换进入和退出动画：
+默认动画是透明快照的透明度与位移组合：新页面从下方小距离滑入并淡入，旧页面向下滑出并淡出。`FadeSlideRouterAnimation` 提供公开设置方法，可以调整共用的动画方向，并配置位移距离、时长、曲线与透明度端点：
+
+```cpp
+auto animation = QSharedPointer<FadeSlideRouterAnimation>::create();
+animation->setOffset(10);
+animation->setDuration(300);
+animation->setEasingCurve(QEasingCurve::OutCubic);
+animation->setDirection(FadeSlideRouterAnimation::Direction::Left);
+animation->setEnterOpacityRange(0.0, 1.0);
+animation->setExitOpacityRange(1.0, 0.0);
+QRouter::of().setAnimation(animation);
+```
+
+`Direction` 表示进入时朝向目标位置的方向；退出时沿进入路径反向离开目标位置，进入和退出共用同一方向设置：
+
+| Direction | 进入 | 退出 |
+| --- | --- | --- |
+| `Top` | 从下方移入目标位置 | 从目标位置向下移出 |
+| `Bottom` | 从上方移入目标位置 | 从目标位置向上移出 |
+| `Left` | 从右侧移入目标位置 | 从目标位置向右移出 |
+| `Right` | 从左侧移入目标位置 | 从目标位置向左移出 |
+
+默认方向为 `Top`，位移为 10 个逻辑像素、时长为 300ms、曲线为 `OutCubic`。位移和时长的负数会限制为零，透明度端点会限制到 `[0, 1]`。
+
+这些参数保存在 `private` 成员中，通过公开设置方法配置。设置方法影响之后创建的动画，正在执行的动画保留创建时的参数。需要完全自定义时，可以实现 `RouterAnimation` 替换进入和退出动画：
 
 ```cpp
 class MyRouterAnimation : public RouterAnimation {
@@ -169,7 +193,7 @@ public:
 QRouter::of().setAnimation(QSharedPointer<MyRouterAnimation>::create());
 ```
 
-`setAnimation(nullptr)` 或 `resetAnimation()` 会恢复默认的透明加位移动画。默认实现使用 10px 位移、300ms 时长和 `OutCubic` 曲线，并由默认动画自行创建透明度 effect；自定义实现自行决定是否创建 effect、位移、时长、曲线及其他动画参数。退出动画传入的 `widget` 已由容器准备好并显示截图，自定义实现只需要在它上面创建并返回未启动的动画对象，动画的启动、完成处理和资源释放由框架统一负责。
+`setAnimation(nullptr)` 或 `resetAnimation()` 会恢复所有默认参数。进入和退出动画接收的 `widget` 都是容器准备好的 `RouterAnimWidget` 透明快照，可以直接对它的 `opacity` 和 `geometry` 属性创建动画。返回的动画对象应保持未启动状态；动画启动、完成处理和资源释放由框架统一负责，真实页面的布局由容器管理。
 
 ### 5. 发送事件
 ```cpp
