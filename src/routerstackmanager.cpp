@@ -3,6 +3,7 @@
 #include "abstractrouterwidget.h"
 #include "qrouterexception.h"
 #include "qrouterpageevent.h"
+#include "routeranimwidget.h"
 
 #include <qcoreapplication.h>
 
@@ -431,16 +432,14 @@ RouterStackManager& RouterStackManager::resetAnimation() {
     return *this;
 }
 
-QPixmap RouterStackManager::captureCurrentPage() const {
+QPixmap RouterStackManager::captureCurrentPage() {
     if (!transition.enabled ||
         stack.isEmpty() || !stack.last()->isVisible()) {
         return {};
     }
+    container->prepareForSnapshot();
     auto* page = stack.last();
-    auto* window = page->window();
-    const QRect pageRect(page->mapTo(window, QPoint()), page->size());
-    // Capture the composed background from ancestors of transparent pages.
-    return window->grab(pageRect);
+    return RouterAnimWidget::capture(page, &transition.outgoingSnapshotOffset);
 }
 
 void RouterStackManager::transitionTo(AbstractRouterWidget* widget, const QPixmap& outgoingSnapshot) {

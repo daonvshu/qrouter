@@ -15,7 +15,9 @@ add_library(${PROJECT_NAME}
     qrouter.cpp
     routeranimation.cpp
     routeranimwidget.cpp
+    ../include/routeranimwidget.h
     routerstackmanager.cpp
+    utils/routerpagetransition.cpp
 
     container/layoutroutercontainer.cpp
     container/stackroutercontainer.cpp

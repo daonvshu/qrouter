@@ -1,91 +1,49 @@
 #include "routeranimation.h"
 
-#include <QGraphicsOpacityEffect>
+#include "routeranimwidget.h"
+
 #include <qparallelanimationgroup.h>
 #include <qpropertyanimation.h>
 
 namespace {
-QGraphicsOpacityEffect* installOpacityEffect(QWidget* widget) {
-    if (widget->graphicsEffect() != nullptr) {
+QAbstractAnimation* createAnimation(QWidget* widget, bool entering) {
+    auto* snapshot = qobject_cast<RouterAnimWidget*>(widget);
+    if (!snapshot) {
         return nullptr;
     }
-    auto* effect = new QGraphicsOpacityEffect(widget);
-    effect->setOpacity(1.0);
-    widget->setGraphicsEffect(effect);
-    return effect;
-}
 
-void removeOpacityEffect(QWidget* widget, QGraphicsOpacityEffect* effect) {
-    if (widget != nullptr && widget->graphicsEffect() == effect) {
-        widget->setGraphicsEffect(nullptr);
-    }
-}
+    constexpr int offset = 10;
+    constexpr int duration = 300;
+    const QRect geometry = widget->geometry();
+    const QRect startGeometry = entering ? geometry.translated(0, offset) : geometry;
+    const QRect endGeometry = entering ? geometry : geometry.translated(0, offset);
+    const qreal startOpacity = entering ? 0.0 : 1.0;
+    const qreal endOpacity = entering ? 1.0 : 0.0;
 
-void removeOpacityEffectWhenAnimationDestroyed(QAbstractAnimation* animation, QWidget* widget, QGraphicsOpacityEffect* effect) {
-    if (effect != nullptr) {
-        QObject::connect(animation, &QObject::destroyed, widget, [widget, effect] {
-            removeOpacityEffect(widget, effect);
-        });
-    }
+    widget->setGeometry(startGeometry);
+    snapshot->setOpacity(startOpacity);
+    auto* group = new QParallelAnimationGroup(widget);
+
+    auto* opacityAnimation = new QPropertyAnimation(snapshot, "opacity", group);
+    opacityAnimation->setStartValue(startOpacity);
+    opacityAnimation->setEndValue(endOpacity);
+    opacityAnimation->setDuration(duration);
+    opacityAnimation->setEasingCurve(QEasingCurve::OutCubic);
+
+    auto* geometryAnimation = new QPropertyAnimation(widget, "geometry", group);
+    geometryAnimation->setStartValue(startGeometry);
+    geometryAnimation->setEndValue(endGeometry);
+    geometryAnimation->setDuration(duration);
+    geometryAnimation->setEasingCurve(QEasingCurve::OutCubic);
+
+    return group;
 }
 }
 
 QAbstractAnimation* FadeSlideRouterAnimation::animateEnter(QWidget* widget) {
-    constexpr int offset = 10;
-    constexpr int duration = 300;
-    const QEasingCurve easingCurve = QEasingCurve::OutCubic;
-
-    const QRect endGeometry = widget->geometry();
-    const QRect startGeometry = endGeometry.translated(0, offset);
-    widget->setGeometry(startGeometry);
-
-    auto* group = new QParallelAnimationGroup(widget);
-    auto* effect = installOpacityEffect(widget);
-    removeOpacityEffectWhenAnimationDestroyed(group, widget, effect);
-
-    if (effect != nullptr) {
-        effect->setOpacity(0.0);
-        auto* opacityAnimation = new QPropertyAnimation(effect, "opacity", group);
-        opacityAnimation->setStartValue(0.0);
-        opacityAnimation->setEndValue(1.0);
-        opacityAnimation->setDuration(duration);
-        opacityAnimation->setEasingCurve(easingCurve);
-    }
-
-    auto* geometryAnimation = new QPropertyAnimation(widget, "geometry", group);
-    geometryAnimation->setStartValue(startGeometry);
-    geometryAnimation->setEndValue(endGeometry);
-    geometryAnimation->setDuration(qMax(0, duration));
-    geometryAnimation->setEasingCurve(easingCurve);
-
-    return group;
+    return createAnimation(widget, true);
 }
 
 QAbstractAnimation* FadeSlideRouterAnimation::animateExit(QWidget* widget) {
-    constexpr int offset = 10;
-    constexpr int duration = 300;
-    const QEasingCurve easingCurve = QEasingCurve::OutCubic;
-
-    const QRect startGeometry = widget->geometry();
-    const QRect endGeometry = startGeometry.translated(0, offset);
-    auto* group = new QParallelAnimationGroup(widget);
-
-    auto* effect = installOpacityEffect(widget);
-    removeOpacityEffectWhenAnimationDestroyed(group, widget, effect);
-
-    if (effect != nullptr) {
-        auto* opacityAnimation = new QPropertyAnimation(effect, "opacity", group);
-        opacityAnimation->setStartValue(1.0);
-        opacityAnimation->setEndValue(0.0);
-        opacityAnimation->setDuration(duration);
-        opacityAnimation->setEasingCurve(easingCurve);
-    }
-
-    auto* geometryAnimation = new QPropertyAnimation(widget, "geometry", group);
-    geometryAnimation->setStartValue(startGeometry);
-    geometryAnimation->setEndValue(endGeometry);
-    geometryAnimation->setDuration(qMax(0, duration));
-    geometryAnimation->setEasingCurve(easingCurve);
-
-    return group;
+    return createAnimation(widget, false);
 }

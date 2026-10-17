@@ -9,15 +9,15 @@ public:
     virtual ~RouterAnimation() = default;
 
     /**
-     * Animate the page entering the container.
-     * @param widget page being displayed
+     * Animate a transparent snapshot of the page entering the container.
+     * @param widget RouterAnimWidget snapshot with an animatable opacity property
      * @return an unstarted animation owned and started by the framework, or nullptr for no animation
      */
     virtual QAbstractAnimation* animateEnter(QWidget* widget) = 0;
 
     /**
-     * Animate a widget representing the page that is leaving the container.
-     * @param widget widget prepared by the caller for the exit animation
+     * Animate a transparent snapshot of the page leaving the container.
+     * @param widget RouterAnimWidget snapshot with an animatable opacity property
      * @return an unstarted animation owned and started by the framework, or nullptr for no animation
      */
     virtual QAbstractAnimation* animateExit(QWidget* widget) = 0;

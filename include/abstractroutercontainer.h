@@ -9,6 +9,7 @@ class RouterAnimation;
 
 struct RouterTransition {
     bool enabled = true;
+    QPointF outgoingSnapshotOffset;
 };
 
 class AbstractRouterContainer : public QObject {
@@ -34,9 +35,14 @@ public:
     virtual void setCurrentWidget(AbstractRouterWidget* widget) = 0;
 
     /**
-     * Set the current page and optionally animate a snapshot of the previous page.
+     * 截图前结束当前过渡，恢复页面的稳定显示状态。
+     */
+    virtual void prepareForSnapshot() {}
+
+    /**
+     * Set the current page and optionally animate transparent snapshots of both pages.
      * @param widget page to display
-     * @param transition transition configuration
+     * @param transition transition configuration and outgoing snapshot draw offset
      * @param outgoingSnapshot snapshot captured before the previous page was removed
      * @param animation animation implementation
      */

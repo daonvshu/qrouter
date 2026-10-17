@@ -229,7 +229,7 @@ private:
 
     void pushInternal(const QByteArray& pageClassName, const QVariant& data, const QPixmap& outgoingSnapshot, bool hasOutgoingSnapshot);
     bool move2TopInternal(const QByteArray& pageClassName, const QPixmap& outgoingSnapshot, bool hasOutgoingSnapshot);
-    QPixmap captureCurrentPage() const;
+    QPixmap captureCurrentPage();
     void transitionTo(AbstractRouterWidget* widget, const QPixmap& outgoingSnapshot = QPixmap());
     void removePageInstance(AbstractRouterWidget* widget);
 

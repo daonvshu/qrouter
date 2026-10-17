@@ -6,8 +6,7 @@
 #include "../abstractroutercontainer.h"
 #include "../abstractrouterwidget.h"
 
-class QAbstractAnimation;
-class RouterAnimWidget;
+class RouterPageTransition;
 
 class StackRouterContainer : public AbstractRouterContainer {
 public:
@@ -19,6 +18,8 @@ public:
 
     void setCurrentWidget(AbstractRouterWidget *widget) override;
 
+    void prepareForSnapshot() override;
+
     void transitionTo(AbstractRouterWidget* widget, const RouterTransition& transition, const QPixmap& outgoingSnapshot = QPixmap(), const QSharedPointer<RouterAnimation>& animation = {}) override;
 
     void removeWidget(AbstractRouterWidget *widget) override;
@@ -26,14 +27,7 @@ public:
 private:
     void cancelTransition();
     void setCurrentWidgetInternal(AbstractRouterWidget* widget);
-    void releaseAnimationOwnerIfIdle();
 
     QStackedWidget* container;
-    QPointer<QAbstractAnimation> activeEnterAnimation;
-    QPointer<QAbstractAnimation> activeExitAnimation;
-    QPointer<RouterAnimWidget> activeExitOverlay;
-    QPointer<AbstractRouterWidget> activeEnterWidget;
-    QSharedPointer<RouterAnimation> activeAnimation;
-    QRect activeEnterEndGeometry;
-    quint64 transitionGeneration = 0;
+    QPointer<RouterPageTransition> activeTransition;
 };
